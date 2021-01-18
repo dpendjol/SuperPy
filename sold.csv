@@ -1,4 +1,4 @@
-id,bought_id,count,sell_date,sell_price
+id,product_id,count,sell_date,sell_price
 1,1,5,2021-01-01,1.0
 2,1,1,2021-01-01,1.0
 2,3,5,2021-01-01,3.0
