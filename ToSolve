@@ -1,0 +1,3 @@
+Solve the following:
+- When trying to write to a file that only contains csv-headers and no other data.
+- When no sell amount argument is given, we want to sell all items of the given product

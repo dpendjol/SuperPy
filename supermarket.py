@@ -184,6 +184,9 @@ class Supermarket:
                 
     
     def write_file(self, file_name, fieldnames, data):
+      '''
+      Write data to the file, rewrite the whole file for now
+      '''
         with open(file_name, 'w', newline='') as f:
             writer = csv.DictWriter(f, fieldnames=fieldnames)
             writer.writeheader()
@@ -232,9 +235,7 @@ class Supermarket:
         for item in data:
             if item['id'] == product_id:
                 costs = int(item['count']) * float(item['price'])
-        return costs            
-
-supermarkt = Supermarket()
+        return costs
     
 if __name__ == "__main__":
     pass

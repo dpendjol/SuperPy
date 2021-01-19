@@ -37,17 +37,6 @@ def buy_product():
     # append given arguments in command line
     # return 'OK'
     pass
- 
-def read_commandline():
-    pass
-
-def read_file(file_name):
-    file_content = []
-    with open(file_name, newline='') as f:
-        reader = csv.reader(f)
-        for row in reader:
-            file_content.append(row)
-    return file_content
 
 def print_report(file_content):
     '''
