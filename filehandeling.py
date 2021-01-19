@@ -37,24 +37,29 @@ class Supermarket:
             except KeyError:
                 self.inventory[key] = value
                 
-        print('Expired:', self.expired)
-        print('Inventory:', self.inventory)
-        print('Sold:', self.sold_id_quantity)
-        print('Sold-price:', self.sold_id_price)
-        print('Bought-amount:', self.bought_id_quantity)
-        print('Bought-price:', self.bought_id_costs)
+        #print('Expired:', self.expired)
+        #print('Inventory:', self.inventory)
+        #print('Sold:', self.sold_id_quantity)
+        #print('Sold-price:', self.sold_id_price)
+        #print('Bought-amount:', self.bought_id_quantity)
+        #print('Bought-price:', self.bought_id_costs)
         
-        print('Total costs expired:', self._get_costs_expired())
-        print('Total cost sold:', self._get_costs_sold())
-        print('Total revenue:', self._get_revenue_sold())
-        print('Total still in inventory:', self._get_money_in_stock())
-        a = self.get_product_id('apple')
-        print('Number apples present:', self.check_inventory(a))
+        #print('Total costs expired:', self._get_costs_expired())
+        #print('Total cost sold:', self._get_costs_sold())
+        #print('Total revenue:', self._get_revenue_sold())
+        #print('Total still in inventory:', self._get_money_in_stock())
+        #a = self.get_product_id('apple')
+        #print('Number apples present:', self.check_inventory(a))
         
-        print(self.get_latest_id('bought'))
+        #print(self.get_latest_id('bought'))
         
-        self.buy_product('tea', 2, 5, '2021-12-12')
-        self.write_file(Supermarket._BOUGHT)
+        #buy_fieldnames = self.buy_product('Vegetables', 2, 5, '2021-05-12')
+        #print('Buy fieldnames:', buy_fieldnames)
+        #self.write_file(Supermarket._BOUGHT, buy_fieldnames, self.bought)
+        #sell_fieldnames = self.sell_product('Vegetables', 5, 5)
+        #print('Sell fieldnames:', sell_fieldnames)
+        #self.write_file(Supermarket._SOLD, sell_fieldnames, self.sold)
+        
 
     def _get_costs_expired(self):
         '''
@@ -100,7 +105,6 @@ class Supermarket:
         for item in self.bought:
             if item['product_name'] == product_name:
                 found_products.append(item['id'])
-        print(found_products)
         return found_products
                 
     
@@ -140,11 +144,12 @@ class Supermarket:
         Buy a product, but first check if it doesn't exist
         '''
         # Check if there is a product width the same price and experation date
+        fieldnames = self.bought[0].keys()
         for item in self.bought:
             print(item)
             if item['product_name'] == product_name and float(item['price']) == price and item['expiration_date'] == expiration_date:
                 item['count'] = int(item['count']) + amount
-                return
+                return fieldnames
             
         new_id = int(self.get_latest_id('bought')) + 1
         new_row = {'id': new_id,
@@ -154,15 +159,35 @@ class Supermarket:
                     'expiration_date': expiration_date
                     }
         self.bought.append(new_row)
-        return
+        return fieldnames
     
+    def sell_product(self, product_name, amount, price):
+        fieldnames = self.sold[0].keys()
+        #check if there is enough in inventory
+        #check if multiple experation dates are in inventory, in other words. are there multiple product id's in the inventory with the same name
+        
+        #if spread over multiple experiation date, split the sell-assignments
+        print('sell product')
+        product_id = self.get_product_id(product_name)
+        print(self.check_inventory(product_id))
+        if amount <= self.check_inventory(product_id):
+            print('there is enough')
+            new_id = int(self.get_latest_id('sold')) + 1
+            new_row = {'id': new_id,
+                    'product_id': product_id[0],
+                    'count': amount,
+                    'sell_date': Supermarket._CURR_date,
+                    'sell_price': price
+                    }
+            self.sold.append(new_row)
+        return fieldnames
+                
     
-    def write_file(self, file_name):
-        fieldnames = self.bought[0].keys()
+    def write_file(self, file_name, fieldnames, data):
         with open(file_name, 'w', newline='') as f:
-            writer = csv.DictWriter(f,fieldnames=fieldnames)
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
             writer.writeheader()
-            for line in self.bought:
+            for line in data:
                 writer.writerow(line)
         return
     
