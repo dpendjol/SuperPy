@@ -37,28 +37,28 @@ class Supermarket:
             except KeyError:
                 self.inventory[key] = value
                 
-        print('Expired:', self.expired)
-        print('Inventory:', self.inventory)
-        print('Sold:', self.sold_id_quantity)
-        print('Sold-price:', self.sold_id_price)
-        print('Bought-amount:', self.bought_id_quantity)
-        print('Bought-price:', self.bought_id_costs)
+        #print('Expired:', self.expired)
+        #print('Inventory:', self.inventory)
+        #print('Sold:', self.sold_id_quantity)
+        #print('Sold-price:', self.sold_id_price)
+        #print('Bought-amount:', self.bought_id_quantity)
+        #print('Bought-price:', self.bought_id_costs)
         
-        print('Total costs expired:', self._get_costs_expired())
-        print('Total cost sold:', self._get_costs_sold())
-        print('Total revenue:', self._get_revenue_sold())
-        print('Total still in inventory:', self._get_money_in_stock())
-        a = self.get_product_id('apple')
-        print('Number apples present:', self.check_inventory(a))
+        #print('Total costs expired:', self._get_costs_expired())
+        #print('Total cost sold:', self._get_costs_sold())
+        #print('Total revenue:', self._get_revenue_sold())
+        #print('Total still in inventory:', self._get_money_in_stock())
+        #a = self.get_product_id('apple')
+        #print('Number apples present:', self.check_inventory(a))
         
-        print(self.get_latest_id('bought'))
+        #print(self.get_latest_id('bought'))
         
-        buy_fieldnames = self.buy_product('Vegetables', 2, 5, '2021-05-12')
-        print('Buy fieldnames:', buy_fieldnames)
-        self.write_file(Supermarket._BOUGHT, buy_fieldnames, self.bought)
-        sell_fieldnames = self.sell_product('Vegetables', 5, 5)
-        print('Sell fieldnames:', sell_fieldnames)
-        self.write_file(Supermarket._SOLD, sell_fieldnames, self.sold)
+        #buy_fieldnames = self.buy_product('Vegetables', 2, 5, '2021-05-12')
+        #print('Buy fieldnames:', buy_fieldnames)
+        #self.write_file(Supermarket._BOUGHT, buy_fieldnames, self.bought)
+        #sell_fieldnames = self.sell_product('Vegetables', 5, 5)
+        #print('Sell fieldnames:', sell_fieldnames)
+        #self.write_file(Supermarket._SOLD, sell_fieldnames, self.sold)
         
 
     def _get_costs_expired(self):
@@ -162,14 +162,17 @@ class Supermarket:
         return fieldnames
     
     def sell_product(self, product_name, amount, price):
+        fieldnames = self.sold[0].keys()
         #check if there is enough in inventory
         #check if multiple experation dates are in inventory, in other words. are there multiple product id's in the inventory with the same name
         
         #if spread over multiple experiation date, split the sell-assignments
-        
-        if amount <= self.check_inventory(product_name):
+        print('sell product')
+        product_id = self.get_product_id(product_name)
+        print(self.check_inventory(product_id))
+        if amount <= self.check_inventory(product_id):
+            print('there is enough')
             new_id = int(self.get_latest_id('sold')) + 1
-            product_id = self.get_product_id(product_name)
             new_row = {'id': new_id,
                     'product_id': product_id[0],
                     'count': amount,
@@ -177,8 +180,7 @@ class Supermarket:
                     'sell_price': price
                     }
             self.sold.append(new_row)
-            fieldnames = self.sold[0].keys()
-            return fieldnames
+        return fieldnames
                 
     
     def write_file(self, file_name, fieldnames, data):
