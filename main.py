@@ -38,6 +38,7 @@ def buy_product():
     # return 'OK'
     pass
 
+## Function is redundanct ##
 def print_report(file_content):
     '''
     Get report as seen in assignment.

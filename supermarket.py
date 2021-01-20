@@ -1,15 +1,25 @@
 import csv
 from datetime import date
+from main import print_report
+from rich.console import Console
+from rich.table import Table
+from reports import print_report
 
 class Supermarket:
-
     _BOUGHT = 'bought.csv'
     _SOLD = 'sold.csv'
     _CURR_date = date.today()
     
     def __init__(self):
+        
+        self._BOUGHT = 'bought.csv'
+        self._SOLD = 'sold.csv'
+        self._CURR_date = date.today()
+        
+        # Read data from file
         self.bought = self.read_file(Supermarket._BOUGHT)
         self.sold = self.read_file(Supermarket._SOLD)
+        print_report(self.bought)
         self.id_names = {}
         self.bought_id_quantity = {}
         self.bought_id_costs = {}
@@ -134,10 +144,11 @@ class Supermarket:
         '''
         Reads the csv file and exports its in a dict.
         Each line becomes a dict in a list
-        '''
+        '''        
         with open(file_name, newline='') as f:
             reader = csv.DictReader(f)
-            return (list(reader))
+            return(list(reader))
+            
 
     def buy_product(self, product_name, price, amount, expiration_date):
         '''
@@ -146,7 +157,6 @@ class Supermarket:
         # Check if there is a product width the same price and experation date
         fieldnames = self.bought[0].keys()
         for item in self.bought:
-            print(item)
             if item['product_name'] == product_name and float(item['price']) == price and item['expiration_date'] == expiration_date:
                 item['count'] = int(item['count']) + amount
                 return fieldnames
@@ -167,9 +177,7 @@ class Supermarket:
         #check if multiple experation dates are in inventory, in other words. are there multiple product id's in the inventory with the same name
         
         #if spread over multiple experiation date, split the sell-assignments
-        print('sell product')
         product_id = self.get_product_id(product_name)
-        print(self.check_inventory(product_id))
         if amount <= self.check_inventory(product_id):
             print('there is enough')
             new_id = int(self.get_latest_id('sold')) + 1
@@ -184,9 +192,9 @@ class Supermarket:
                 
     
     def write_file(self, file_name, fieldnames, data):
-      '''
-      Write data to the file, rewrite the whole file for now
-      '''
+        '''
+        Write data to the file, rewrite the whole file for now
+        '''
         with open(file_name, 'w', newline='') as f:
             writer = csv.DictWriter(f, fieldnames=fieldnames)
             writer.writeheader()
@@ -194,48 +202,54 @@ class Supermarket:
                 writer.writerow(line)
         return
     
-               
-########################################################################
-
-
-    def get_selection(self, data:list, filter_date:date, period:str='day') -> float:
-        '''
-        Get the rows of data within a specifiec date
-        @param data list of dicts with data
-        @filter_date date to filter
-        @period does it had to be month, day or year
-        @returns a float containing the revenue of the day or a month
-        '''
-        found_rows = []
-        
-        if period == 'month':
-            myfilter = filter_date.isoformat()[0:7]
-            end = 7
-        elif period == 'day':
-            myfilter = filter_date.isoformat()
-            end = None
-        
-        for item in data:
-            if item['sell_date'][0:end] == myfilter:
-                found_rows.append(item)
-        return found_rows
-                
-
-    def get_numbers(self, data:list):
-        total_revenue = 0
-        total_costs = 0
-        for item in data:
-            total_costs += get_costs(read_file('bought.csv'), 
-                                    item['product_id'],
-                                    item['count'])
-            total_revenue += int(item['count']) * float(item['sell_price'])
-        return {'revenue': total_revenue, 'costs': total_costs}
-
-    def get_costs(self, data:list, product_id:str, number_sold:int):
-        for item in data:
-            if item['id'] == product_id:
-                costs = int(item['count']) * float(item['price'])
-        return costs
     
+    def get_report_inventory(self, asked_date:str):
+        '''
+        Display a table which contains every inventory item
+        '''
+        asked_date = date.fromisoformat(asked_date)
+        
+        products = {}
+        
+        table = Table(show_header=True, title='Inventory report')
+        
+        file_content = []
+        for row in self.bought:
+            try:
+                check_date = date.fromisoformat(row['buy_date'])
+            except:
+                check_date = date.fromisoformat(row['sell_date'])
+            if check_date <= asked_date:
+                file_content.append(row)
+        
+        table.add_column('Product Name')
+        table.add_column('Amount')
+        table.add_column('Bought for')
+        table.add_column('Expire on')
+        
+        for item in file_content:
+            products[item['id']] = [
+                item['product_name'],
+                item['price'],
+                item['expiration_date']
+            ]
+
+        for key, value in self.inventory.items():
+            if not value == 0:
+                # Only add roy if the key exists. Work-a-round for when we need a inventory from the past
+                try:
+                    product = products[key]
+                    table.add_row(str(product[0]), str(value), str(product[1]), str(product[2]))
+                except KeyError:
+                    pass
+            
+        return table
+               
+#######################################################################
+mysuper = Supermarket()
+report = mysuper.get_report_inventory('2020-05-02')
+myconsole = Console()
+myconsole.print(report)
+
 if __name__ == "__main__":
     pass

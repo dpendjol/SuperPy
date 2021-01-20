@@ -1,13 +1,10 @@
 import argparse
-import csv
-from datetime import date
 
 
 def main():
   args = get_args()
   print("Arguments: \n", args, "\n", 20 * r"\_/", "\n")
   
-
 
 # Getting the correct data from the CLI and calling the function including the arguments belonging to that function from the CLI
 def get_args() -> dict:

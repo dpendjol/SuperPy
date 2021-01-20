@@ -11,16 +11,18 @@ def main():
     file_content = get_file_content(soldfile)
     print_report(file_content)
 
-    #get_unique_sold_items()
 
+#Redundant
 def get_file_content(file_name):
     with open(file_name, 'r', newline='') as f:
         reader = csv.DictReader(f)
         return list(reader)
 
+#redundant
 def conv_date(d):
     return date.fromisoformat(d)
 
+#redundant
 def get_expired():
     #read the boughtfile and print a list of everthing that is expired
     content = get_file_content(boughtfile)
@@ -90,7 +92,6 @@ def print_report(file_content):
         print(line)
         row_number += 1
     print(row_seperator)
-
 
 if __name__ == "__main__":
     main()
