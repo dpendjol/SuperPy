@@ -46,56 +46,72 @@ class Supermarket:
                 self.inventory[key] = value - self.sold_id_quantity[key]
             except KeyError:
                 self.inventory[key] = value
-                
-        #print('Expired:', self.expired)
-        #print('Inventory:', self.inventory)
-        #print('Sold:', self.sold_id_quantity)
-        #print('Sold-price:', self.sold_id_price)
-        #print('Bought-amount:', self.bought_id_quantity)
-        #print('Bought-price:', self.bought_id_costs)
-        
-        #print('Total costs expired:', self._get_costs_expired())
-        #print('Total cost sold:', self._get_costs_sold())
-        #print('Total revenue:', self._get_revenue_sold())
-        #print('Total still in inventory:', self._get_money_in_stock())
-        #a = self.get_product_id('apple')
-        #print('Number apples present:', self.check_inventory(a))
-        
-        #print(self.get_latest_id('bought'))
-        
-        #buy_fieldnames = self.buy_product('Vegetables', 2, 5, '2021-05-12')
-        #print('Buy fieldnames:', buy_fieldnames)
-        #self.write_file(Supermarket._BOUGHT, buy_fieldnames, self.bought)
-        #sell_fieldnames = self.sell_product('Vegetables', 5, 5)
-        #print('Sell fieldnames:', sell_fieldnames)
-        #self.write_file(Supermarket._SOLD, sell_fieldnames, self.sold)
-        
 
-    def _get_costs_expired(self):
+    def get_costs_expired(self):
         '''
         Get the cost of the expired products
         '''
         total_costs = 0
-        for key, value in self.expired.items():
-            total_costs += self.inventory[key] * value
+        
+        products_bought = {}
+        for product in self.bought:
+            products_bought[product['id']] = [
+                product['price'],
+                product['count'],
+                product['expiration_date']
+            ]
+        
+        products_sold = {}
+        for product in self.sold:
+            products_sold[product['product_id']] = product['count']
+        
+        expired = {}
+        for key, value in products_bought.items():
+            if key in products_sold.keys():
+                products_bought[key][1] = int(products_bought[key][1]) - int(products_sold[key])
+            if not products_bought[key][1] == 0 and start_date <= check_date <= end_date:
+                expired[key] = value
+
+        print(expired)
         return total_costs
     
-    def _get_costs_sold(self):
+    def _get_costs_sold(self, start_date='1970-01-01', end_date='2200-12-12'):
         '''
         Get the cost of the sold products
         '''
+        start_date = date.fromisoformat(start_date)
+        end_date = date.fromisoformat(end_date)
         total_costs = 0
-        for key, value in self.sold_id_quantity.items():
-            total_costs += self.bought_id_costs[key] * value
+        sold_products = []
+        for product in self.sold:
+            check_date = date.fromisoformat(product['sell_date'])
+            if start_date <= check_date <= end_date:
+                sold_products.append([product['product_id'], product['count']])
+            
+        my_products = {}
+        for product in self.bought:
+            my_products[product['id']] = product['price']
+        for product in sold_products:
+            total_costs += (int(product[1]) * float(my_products[product[0]]))
         return total_costs
     
-    def _get_revenue_sold(self):
+    def get_revenue_sold(self, start_date='1970-01-01', end_date='2022-12-12'):
         '''
         Get the revenue of the sold products
         '''
+        start_date = date.fromisoformat(start_date)
+        end_date = date.fromisoformat(end_date)
+        
+        file_content = []
         total_revenue = 0
-        for key, value in self.sold_id_quantity.items():
-            total_revenue += self.sold_id_price[key] * value
+        for row in self.sold:
+            try:
+                check_date = date.fromisoformat(row['buy_date'])
+            except:
+                check_date = date.fromisoformat(row['sell_date'])
+            if start_date <= check_date <= end_date:
+                total_revenue += (int(row['count']) * float(row['sell_price']))
+                file_content.append(row)
         return total_revenue
     
     def _get_money_in_stock(self):
@@ -251,5 +267,11 @@ report = mysuper.get_report_inventory('2020-05-02')
 myconsole = Console()
 myconsole.print(report)
 
+revenue = mysuper.get_revenue_sold('2020-01-01', '2021-01-30')
+myconsole.print(revenue)
+costs = mysuper._get_costs_sold('2020-01-01', '2021-01-30')
+myconsole.print(costs)
+
+mysuper.get_costs_expired()
 if __name__ == "__main__":
     pass
