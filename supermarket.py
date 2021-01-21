@@ -19,7 +19,7 @@ class Supermarket:
         # Read data from file
         self.bought = self.read_file(Supermarket._BOUGHT)
         self.sold = self.read_file(Supermarket._SOLD)
-        print_report(self.bought)
+        # print_report(self.bought)
         self.id_names = {}
         self.bought_id_quantity = {}
         self.bought_id_costs = {}
@@ -27,74 +27,112 @@ class Supermarket:
         self.sold_id_price = {}
         self.inventory = {}
         self.expired = {}
-        
-        for item in self.bought:
-            self.bought_id_quantity[item['id']] = int(item['count'])
-            if date.fromisoformat(item['expiration_date']) < Supermarket._CURR_date:
-                self.expired[item['id']] = float(item['price'])
-            self.bought_id_costs[item['id']] = float(item['price'])
 
-        for item in self.sold:
-            self.sold_id_price[item['id']] = float(item['sell_price'])
-            try:
-                self.sold_id_quantity[item['product_id']] += int(item['count'])
-            except KeyError:
-                self.sold_id_quantity[item['product_id']] = int(item['count'])
+    ############ DONE
+    def read_file(self, file_name) -> list:
+        '''
+        Reads the csv file and exports its in a dict.
+        @returns dict with key id, remaining column values in nested dict
+        @param filename in string with relative path
+        '''        
+        with open(file_name, newline='') as f:
+            reader = csv.DictReader(f)
+            output = {}
             
-        for key, value in self.bought_id_quantity.items():
-            try:
-                self.inventory[key] = value - self.sold_id_quantity[key]
-            except KeyError:
-                self.inventory[key] = value
-
-    def get_costs_expired(self):
+            if file_name == Supermarket._BOUGHT:
+                for line in reader:
+                    output[line['id']] = {
+                        'product_name': line['product_name'],
+                        'purchase_count': int(line['count']),
+                        'purchase_price': float(line['price']),
+                        'expiration_date': date.fromisoformat(line['expiration_date']),
+                        'purchase_date': date.fromisoformat(line['buy_date'])
+                    }
+                
+            if file_name == Supermarket._SOLD:
+                for line in reader:
+                    output[line['id']] = {
+                        'product_id': line['product_id'],
+                        'selling_count': int(line['count']),
+                        'selling_price': float(line['sell_price']),
+                        'selling_date': date.fromisoformat(line['sell_date'])
+                    }
+                    
+            return output
+        
+    #Done rewritten
+    def get_report_inventory(self, asked_date:str):
         '''
-        Get the cost of the expired products
+        Display a table which contains every inventory item
         '''
-        total_costs = 0
+        asked_date = date.fromisoformat(asked_date)
         
-        products_bought = {}
-        for product in self.bought:
-            products_bought[product['id']] = [
-                product['price'],
-                product['count'],
-                product['expiration_date']
-            ]
+        table = Table(show_header=True, title='Inventory report')
+        table.add_column('Product Name')
+        table.add_column('Amount')
+        table.add_column('Bought for')
+        table.add_column('Expire on')
         
-        products_sold = {}
-        for product in self.sold:
-            products_sold[product['product_id']] = product['count']
+        inventory = self.get_inventory()
         
-        expired = {}
-        for key, value in products_bought.items():
-            if key in products_sold.keys():
-                products_bought[key][1] = int(products_bought[key][1]) - int(products_sold[key])
-            if not products_bought[key][1] == 0 and start_date <= check_date <= end_date:
-                expired[key] = value
-
-        print(expired)
-        return total_costs
+        for key, value in inventory.items():
+            if not value == 0:
+                # Only add roy if the key exists. Work-a-round for when we need a inventory from the past
+                try:
+                    product = self.bought[key]
+                    try:
+                        check_date = product['purchase_date']
+                    except:
+                        check_date = product['selling_date']
+                    if check_date <= asked_date:
+                        table.add_row(
+                            product['product_name'],
+                            str(value),
+                            str(product['purchase_price']),
+                            date.isoformat(check_date)
+                        )
+                except KeyError:
+                    pass
+                  
+        return table
     
-    def _get_costs_sold(self, start_date='1970-01-01', end_date='2200-12-12'):
+    #Done rewritten
+    def get_inventory(self):
+        #returns dict {product_id: product_count_in_inventory}
+        inventory = {}
+        sold_products = self.sold.values()
+        sold_product_ids = []
+        sold_products_info = {}
+        
+        for item in sold_products:
+            sold_product_ids.append(item['product_id'])
+            sold_products_info[item['product_id']] = item['selling_count']
+            
+        for key, value in self.bought.items():
+            if key in sold_product_ids:
+                inventory[key] = value['purchase_count'] - sold_products_info[key]
+            else:
+                inventory[key] = value['purchase_count']
+        return inventory
+    
+    #Done rewritten
+    def get_costs_sold(self, start_date='1970-01-01', end_date='2200-12-12'):
         '''
         Get the cost of the sold products
+        returns a integer
         '''
         start_date = date.fromisoformat(start_date)
         end_date = date.fromisoformat(end_date)
+        
         total_costs = 0
-        sold_products = []
-        for product in self.sold:
-            check_date = date.fromisoformat(product['sell_date'])
+        for key, value in self.sold.items():
+            check_date = value['selling_date']
             if start_date <= check_date <= end_date:
-                sold_products.append([product['product_id'], product['count']])
-            
-        my_products = {}
-        for product in self.bought:
-            my_products[product['id']] = product['price']
-        for product in sold_products:
-            total_costs += (int(product[1]) * float(my_products[product[0]]))
+                total_costs += (self.bought[value['product_id']]['purchase_price'] * value['selling_count'])
+                
         return total_costs
-    
+
+    # Done rewritten
     def get_revenue_sold(self, start_date='1970-01-01', end_date='2022-12-12'):
         '''
         Get the revenue of the sold products
@@ -102,111 +140,139 @@ class Supermarket:
         start_date = date.fromisoformat(start_date)
         end_date = date.fromisoformat(end_date)
         
-        file_content = []
         total_revenue = 0
-        for row in self.sold:
-            try:
-                check_date = date.fromisoformat(row['buy_date'])
-            except:
-                check_date = date.fromisoformat(row['sell_date'])
+        for key, value in self.sold.items():
+            check_date = value['selling_date']
             if start_date <= check_date <= end_date:
-                total_revenue += (int(row['count']) * float(row['sell_price']))
-                file_content.append(row)
+                total_revenue += (value['selling_count'] * value['selling_price'])
         return total_revenue
-    
-    def _get_money_in_stock(self):
-        '''
-        Get the money still tied up in stock
-        '''
-        total_costs_inventory = 0
-        for key, value in self.inventory.items():
-            total_costs_inventory += self.bought_id_costs[key] * value
-        return total_costs_inventory
-        
-    def get_product_id(self, product_name):
-        '''
-        Get the product id when a product name is given
-        '''
-        found_products = []
-        for item in self.bought:
-            if item['product_name'] == product_name:
-                found_products.append(item['id'])
-        return found_products
-                
-    
-    def check_inventory(self, products):
-        '''
-        Check how many of the asked product is in stock
-        @products: list of product id codes
-        '''
-        number_present = 0
-        for key, value in self.inventory.items():
-            if key in products:
-                number_present += value
-        return number_present
-    
-    
-    def get_latest_id(self, infile='sold'):
-        '''
-        Get the latest id code
-        '''
-        if infile == 'sold':
-            return max(self.sold_id_price.keys())
-        elif infile == 'bought':
-            return max(self.bought_id_costs.keys())
-                
 
-    def read_file(self, file_name) -> list:
-        '''
-        Reads the csv file and exports its in a dict.
-        Each line becomes a dict in a list
-        '''        
-        with open(file_name, newline='') as f:
-            reader = csv.DictReader(f)
-            return(list(reader))
-            
-
+    ##################################
+    # Rewritten
+    ##################################
     def buy_product(self, product_name, price, amount, expiration_date):
         '''
         Buy a product, but first check if it doesn't exist
         '''
         # Check if there is a product width the same price and experation date
-        fieldnames = self.bought[0].keys()
-        for item in self.bought:
-            if item['product_name'] == product_name and float(item['price']) == price and item['expiration_date'] == expiration_date:
-                item['count'] = int(item['count']) + amount
-                return fieldnames
+        for key, value in self.bought.items():
+            if value['product_name'] == product_name and value['purchase_price'] == price and value['expiration_date'] == expiration_date:
+                value['purchase_count'] += amount
+                return key
             
         new_id = int(self.get_latest_id('bought')) + 1
-        new_row = {'id': new_id,
-                    'product_name': product_name,
-                    'count': amount,
-                    'price': price,
-                    'expiration_date': expiration_date
-                    }
-        self.bought.append(new_row)
-        return fieldnames
-    
+        self.bought[new_id] = {
+            'product_name': product_name,
+            'count': amount,
+            'price': price,
+            'expiration_date': expiration_date,
+            'buy_date': Supermarket._CURR_date
+        }
+   
+        return True
+
+    #Rewritten this function
+    def get_product_id(self, product_name):
+        '''
+        Get the product id when a product name is given
+        @returns a list with product id's that have the product_name
+        '''
+        product_ids = []
+        for key, value in self.bought.items():
+            if value['product_name'] == product_name:
+                product_ids.append(key)
+        if len(product_ids) > 0:
+            return product_ids
+        return 'no key found'
+
+    ##################################
+    # Has been rewritten
+    ##################################
     def sell_product(self, product_name, amount, price):
-        fieldnames = self.sold[0].keys()
         #check if there is enough in inventory
         #check if multiple experation dates are in inventory, in other words. are there multiple product id's in the inventory with the same name
         
         #if spread over multiple experiation date, split the sell-assignments
-        product_id = self.get_product_id(product_name)
-        if amount <= self.check_inventory(product_id):
-            print('there is enough')
-            new_id = int(self.get_latest_id('sold')) + 1
-            new_row = {'id': new_id,
-                    'product_id': product_id[0],
-                    'count': amount,
-                    'sell_date': Supermarket._CURR_date,
-                    'sell_price': price
+        
+        product_ids = self.get_product_id(product_name)
+        
+        inventory = self.get_inventory()
+        
+        #is there enough
+        total_amount = 0
+        for product_id in product_ids:
+            total_amount += inventory[product_id]
+        
+        if total_amount < amount:
+            return 'Not enough in stock'
+        
+        for product_id in product_ids:
+            if inventory[product_id] >= amount:
+                new_id = int(self.get_latest_id('sold')) + 1
+                self.sold[str(new_id)] = {
+                    'product_id': product_id,
+                    'selling_count': amount,
+                    'selling_date': Supermarket._CURR_date,
+                    'selling_price': price
                     }
-            self.sold.append(new_row)
-        return fieldnames
-                
+            elif inventory[product_id] > 0:
+                sell_out_amount = inventory[product_id]                
+                new_id = int(self.get_latest_id('sold')) + 1
+                self.sold[str(new_id)] = {
+                    'product_id': product_id,
+                    'selling_count': sell_out_amount,
+                    'selling_date': Supermarket._CURR_date,
+                    'selling_price': price
+                    }
+                inventory[product_id] = 0
+                amount -= sell_out_amount
+        return True
+
+    # Did not need to be rewritten
+    def get_latest_id(self, infile='sold'):
+        '''
+        Get the latest id code
+        '''
+        if infile == 'sold':
+            return max(self.sold.keys())
+        elif infile == 'bought':
+            return max(self.bought.keys())
     
+
+##############################################################################
+#Currently working here
+    def get_costs_expired(self, start_date='1970-01-01', end_date='2200-01-01'):
+        '''
+        Get the cost of the expired products
+        '''
+        total_costs = 0
+        start_date = date.fromisoformat(start_date)
+        end_date = date.fromisoformat(end_date)
+        
+        products_bought = self.bought
+        # for product in self.bought:
+        #     products_bought[product['id']] = [
+        #         product['price'],
+        #         product['count'],
+        #         product['expiration_date']
+        #     ]
+        
+        products_sold = {}
+        for key, value in self.sold.items():
+            products_sold[value['product_id']] = value['selling_count']
+        
+        expired = {}
+        for key, value in products_bought.items():
+            check_date = value['expiration_date']
+            
+            if key in products_sold.keys():
+                products_bought[key][1] = int(products_bought[key][1]) - int(products_sold[key])
+            if not products_bought[key][1] == 0 and start_date <= check_date <= end_date:
+                expired[key] = value
+
+        return total_costs
+                
+   
     def write_file(self, file_name, fieldnames, data):
         '''
         Write data to the file, rewrite the whole file for now
@@ -217,61 +283,6 @@ class Supermarket:
             for line in data:
                 writer.writerow(line)
         return
-    
-    
-    def get_report_inventory(self, asked_date:str):
-        '''
-        Display a table which contains every inventory item
-        '''
-        asked_date = date.fromisoformat(asked_date)
-        
-        products = {}
-        
-        table = Table(show_header=True, title='Inventory report')
-        
-        file_content = []
-        for row in self.bought:
-            try:
-                check_date = date.fromisoformat(row['buy_date'])
-            except:
-                check_date = date.fromisoformat(row['sell_date'])
-            if check_date <= asked_date:
-                file_content.append(row)
-        
-        table.add_column('Product Name')
-        table.add_column('Amount')
-        table.add_column('Bought for')
-        table.add_column('Expire on')
-        
-        for item in file_content:
-            products[item['id']] = [
-                item['product_name'],
-                item['price'],
-                item['expiration_date']
-            ]
-
-        for key, value in self.inventory.items():
-            if not value == 0:
-                # Only add roy if the key exists. Work-a-round for when we need a inventory from the past
-                try:
-                    product = products[key]
-                    table.add_row(str(product[0]), str(value), str(product[1]), str(product[2]))
-                except KeyError:
-                    pass
-            
-        return table
                
-#######################################################################
-mysuper = Supermarket()
-report = mysuper.get_report_inventory('2020-05-02')
-myconsole = Console()
-myconsole.print(report)
-
-revenue = mysuper.get_revenue_sold('2020-01-01', '2021-01-30')
-myconsole.print(revenue)
-costs = mysuper._get_costs_sold('2020-01-01', '2021-01-30')
-myconsole.print(costs)
-
-mysuper.get_costs_expired()
 if __name__ == "__main__":
     pass

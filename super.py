@@ -1,5 +1,7 @@
 from supermarket import Supermarket
 from cli import get_args
+from supermarket import Supermarket
+from rich.console import Console
 
 mysuper = Supermarket()
 args = get_args()
@@ -12,6 +14,11 @@ if args.command == 'buy':
 if args.command == 'sell':
     fieldnames = mysuper.sell_product(args.product_name, args.amount, args.price)
     mysuper.write_file(mysuper._SOLD, fieldnames, mysuper.sold)
+
+mysuper = Supermarket()
+myconsole = Console()
+
+mysuper.sell_product('milk', 60, 2)
     
 print('done')
 
