@@ -18,7 +18,11 @@ if args.command == 'sell':
 mysuper = Supermarket()
 myconsole = Console()
 
-mysuper.sell_product('milk', 60, 2)
-    
+print(mysuper.get_costs_expired(end_date='2020-05-01'))
+
+#mysuper.buy_product('frietjes', 2, 10, '2121-01-01')
+#mysuper.write_file(mysuper._BOUGHT, mysuper.bought)
+report = mysuper.get_report_inventory('2021-01-31')
+myconsole.print(report)
 print('done')
 

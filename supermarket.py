@@ -19,14 +19,6 @@ class Supermarket:
         # Read data from file
         self.bought = self.read_file(Supermarket._BOUGHT)
         self.sold = self.read_file(Supermarket._SOLD)
-        # print_report(self.bought)
-        self.id_names = {}
-        self.bought_id_quantity = {}
-        self.bought_id_costs = {}
-        self.sold_id_quantity = {}
-        self.sold_id_price = {}
-        self.inventory = {}
-        self.expired = {}
 
     ############ DONE
     def read_file(self, file_name) -> list:
@@ -43,19 +35,19 @@ class Supermarket:
                 for line in reader:
                     output[line['id']] = {
                         'product_name': line['product_name'],
-                        'purchase_count': int(line['count']),
-                        'purchase_price': float(line['price']),
+                        'purchase_count': int(line['purchase_count']),
+                        'purchase_price': float(line['purchase_price']),
                         'expiration_date': date.fromisoformat(line['expiration_date']),
-                        'purchase_date': date.fromisoformat(line['buy_date'])
+                        'purchase_date': date.fromisoformat(line['purchase_date'])
                     }
                 
             if file_name == Supermarket._SOLD:
                 for line in reader:
                     output[line['id']] = {
                         'product_id': line['product_id'],
-                        'selling_count': int(line['count']),
-                        'selling_price': float(line['sell_price']),
-                        'selling_date': date.fromisoformat(line['sell_date'])
+                        'selling_count': int(line['selling_count']),
+                        'selling_price': float(line['selling_price']),
+                        'selling_date': date.fromisoformat(line['selling_date'])
                     }
                     
             return output
@@ -76,7 +68,7 @@ class Supermarket:
         inventory = self.get_inventory()
         
         for key, value in inventory.items():
-            if not value == 0:
+            if not value == 0 and asked_date < self.bought[key]['expiration_date']:
                 # Only add roy if the key exists. Work-a-round for when we need a inventory from the past
                 try:
                     product = self.bought[key]
@@ -89,7 +81,7 @@ class Supermarket:
                             product['product_name'],
                             str(value),
                             str(product['purchase_price']),
-                            date.isoformat(check_date)
+                            date.isoformat(product['expiration_date'])
                         )
                 except KeyError:
                     pass
@@ -155,7 +147,16 @@ class Supermarket:
         Buy a product, but first check if it doesn't exist
         '''
         # Check if there is a product width the same price and experation date
+        expiration_date = date.fromisoformat(expiration_date)
+        
         for key, value in self.bought.items():
+            if value['product_name'] == product_name:
+                print('Productname gelijk')
+            if value['purchase_price'] == price:
+                print('product prijs gelijk')
+            if value['expiration_date'] == expiration_date:
+                print('verval datum gelijk')
+                
             if value['product_name'] == product_name and value['purchase_price'] == price and value['expiration_date'] == expiration_date:
                 value['purchase_count'] += amount
                 return key
@@ -163,10 +164,10 @@ class Supermarket:
         new_id = int(self.get_latest_id('bought')) + 1
         self.bought[new_id] = {
             'product_name': product_name,
-            'count': amount,
-            'price': price,
+            'purchase_count': amount,
+            'purchase_price': price,
             'expiration_date': expiration_date,
-            'buy_date': Supermarket._CURR_date
+            'purchase_date': Supermarket._CURR_date
         }
    
         return True
@@ -238,9 +239,7 @@ class Supermarket:
         elif infile == 'bought':
             return max(self.bought.keys())
     
-
-##############################################################################
-#Currently working here
+    
     def get_costs_expired(self, start_date='1970-01-01', end_date='2200-01-01'):
         '''
         Get the cost of the expired products
@@ -249,39 +248,37 @@ class Supermarket:
         start_date = date.fromisoformat(start_date)
         end_date = date.fromisoformat(end_date)
         
-        products_bought = self.bought
-        # for product in self.bought:
-        #     products_bought[product['id']] = [
-        #         product['price'],
-        #         product['count'],
-        #         product['expiration_date']
-        #     ]
+        inventory = self.get_inventory()
         
-        products_sold = {}
-        for key, value in self.sold.items():
-            products_sold[value['product_id']] = value['selling_count']
-        
-        expired = {}
-        for key, value in products_bought.items():
-            check_date = value['expiration_date']
-            
-            if key in products_sold.keys():
-                products_bought[key][1] = int(products_bought[key][1]) - int(products_sold[key])
-            if not products_bought[key][1] == 0 and start_date <= check_date <= end_date:
-                expired[key] = value
-
+        for product in inventory.keys():
+            if start_date < self.bought[product]['expiration_date'] < end_date:
+                total_costs += (inventory[product] * self.bought[product]['purchase_price'])                
         return total_costs
                 
    
-    def write_file(self, file_name, fieldnames, data):
+    def write_file(self, file_name, data):
         '''
         Write data to the file, rewrite the whole file for now
         '''
+
+        with open(file_name, 'r') as f:
+            headers = f.readline().strip().split(',')
+            
+        
         with open(file_name, 'w', newline='') as f:
-            writer = csv.DictWriter(f, fieldnames=fieldnames)
+            writer = csv.DictWriter(f, fieldnames=headers)
             writer.writeheader()
-            for line in data:
-                writer.writerow(line)
+            for key, value in  data.items():
+                print(value)
+                output = {
+                    headers[0]: key, 
+                    headers[1]: value['product_name'],
+                    headers[2]: value['purchase_count'],
+                    headers[3]: value['purchase_price'],
+                    headers[4]: value['expiration_date'],
+                    headers[5]: value['purchase_date']
+                    }
+                writer.writerow(output)
         return
                
 if __name__ == "__main__":
