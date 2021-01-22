@@ -149,14 +149,7 @@ class Supermarket:
         # Check if there is a product width the same price and experation date
         expiration_date = date.fromisoformat(expiration_date)
         
-        for key, value in self.bought.items():
-            if value['product_name'] == product_name:
-                print('Productname gelijk')
-            if value['purchase_price'] == price:
-                print('product prijs gelijk')
-            if value['expiration_date'] == expiration_date:
-                print('verval datum gelijk')
-                
+        for key, value in self.bought.items():    
             if value['product_name'] == product_name and value['purchase_price'] == price and value['expiration_date'] == expiration_date:
                 value['purchase_count'] += amount
                 return key
@@ -196,7 +189,8 @@ class Supermarket:
         #if spread over multiple experiation date, split the sell-assignments
         
         product_ids = self.get_product_id(product_name)
-        
+        print(product_name, amount, price)
+        print(product_ids)
         inventory = self.get_inventory()
         
         #is there enough
@@ -268,17 +262,27 @@ class Supermarket:
         with open(file_name, 'w', newline='') as f:
             writer = csv.DictWriter(f, fieldnames=headers)
             writer.writeheader()
-            for key, value in  data.items():
-                print(value)
-                output = {
-                    headers[0]: key, 
-                    headers[1]: value['product_name'],
-                    headers[2]: value['purchase_count'],
-                    headers[3]: value['purchase_price'],
-                    headers[4]: value['expiration_date'],
-                    headers[5]: value['purchase_date']
-                    }
-                writer.writerow(output)
+            if file_name == Supermarket._BOUGHT:
+                for key, value in  data.items():
+                    output = {
+                        headers[0]: key, 
+                        headers[1]: value['product_name'],
+                        headers[2]: value['purchase_count'],
+                        headers[3]: value['purchase_price'],
+                        headers[4]: value['expiration_date'],
+                        headers[5]: value['purchase_date']
+                        }
+                    writer.writerow(output)
+            if file_name == Supermarket._SOLD:
+                for key, value in  data.items():
+                    output = {
+                        headers[0]: key, 
+                        headers[1]: value['product_id'],
+                        headers[2]: value['selling_count'],
+                        headers[3]: value['selling_price'],
+                        headers[4]: value['selling_date']
+                        }
+                    writer.writerow(output)
         return
                
 if __name__ == "__main__":
