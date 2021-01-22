@@ -1,3 +1,4 @@
 id,product_id,selling_count,selling_date,selling_price
 1,1,10,2020-01-01,10
-2,5,50,2021-01-22,10
+2,5,50,2021-01-21,10
+3,5,100,2021-01-22,10

@@ -10,6 +10,8 @@ def main():
 def get_args() -> dict:
   parser = argparse.ArgumentParser()
   subparser = parser.add_subparsers(dest="command")
+# Everthing that had to do with shifting time
+  parser.add_argument("--advance-time", type=int, help="specify how many day's you want to shift time, use the minus sign (-) for days to the past")
 # Everything that has to do with the report command
   report_parser = subparser.add_parser("report", help="report command")
   report_parser.add_argument("subcommand", choices=["inventory", "revenue", "profit"], help="Choose which report you want to see")

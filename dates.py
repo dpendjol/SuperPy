@@ -69,15 +69,14 @@ def shift_date(file_name:str, num_days:int):
     num_days -- integer to shift the day's
     
     Returns:
-    None
+    datetime object of shift day
     '''
     
     curr_date = get_current_date(file_name)
     new_date = 0
     shift = timedelta(days=num_days)
     new_date = curr_date + shift
-    set_date(file_name, date.isoformat(new_date))
-    return
+    return new_date
 
 if __name__ == "__main__":
     main()

@@ -1,9 +1,7 @@
 import csv
 from datetime import date
-from main import print_report
 from rich.console import Console
 from rich.table import Table
-from reports import print_report
 
 class Supermarket:
     _BOUGHT = 'bought.csv'
