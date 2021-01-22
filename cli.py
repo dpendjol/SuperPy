@@ -1,13 +1,10 @@
 import argparse
-import csv
-from datetime import date
 
 
 def main():
   args = get_args()
   print("Arguments: \n", args, "\n", 20 * r"\_/", "\n")
   
-
 
 # Getting the correct data from the CLI and calling the function including the arguments belonging to that function from the CLI
 def get_args() -> dict:
@@ -37,83 +34,6 @@ def get_args() -> dict:
   args = parser.parse_args()
 
   return args
-
-def select_function(args):
-  '''
-  Check which command is given and execute the associated functions
-  '''
-  if args.command == "buy":
-    print("calling buy function")
-    print(buy(args.product_name, args.amount, args.price, args.expiration_date))
-  elif args.command == "report":
-    print("calling report function")
-  elif args.command == "sell":
-    print("calling sell function")
-    print(sell(args.product_name, args.price, args.amount))
-  else:
-    print(f"Sorry, I don't know what to do with the command {args.command}")
-  pass
-
-def sell(product_name:str, price:float, amount:int=1, ):
-  '''
-  Process a sell action from the user
-
-  Args:
-    product_name: name of the product sold
-    price: price of the product sold
-
-  Returns:
-    None
-  '''
-  #find the key of the product
-  product_id = -1
-  file_content = read_file("./bought.csv")
-  for row in file_content:
-    if row[1] == product_name:
-      product_id = row[0]
-      break
-  if product_id == -1:
-    print('product not found')
-    return
-  last_id = find_last_id('./sold.csv')
-  today = date.today()
-  with open('./sold.csv', 'a', newline='') as f:
-    writer = csv.writer(f)
-    writer.writerow([last_id + 1, product_id, amount, today.isoformat(), price])
-  return 'ok'
-
-
-def find_product_id(product_name:str) -> int:
-  pass
-
-
-def buy(product_name:str, amount:int, price:float, expiration_date:str) -> bool:
-  last_id = find_last_id('./bought.csv')
-  ### Write info to file
-  with open('./bought.csv', 'a', newline='') as f:
-    writer = csv.writer(f)
-    writer.writerow([last_id + 1, product_name, price, expiration_date])
-  return True
-
-
-def find_last_id(file:str):
-  last_id = -1 #containing last id used in file
-  ### Get last_id used in file
-  with open(file, newline='') as f:
-    reader = csv.reader(f)
-    for row in reversed(list(reader)):
-      if last_id == -1:
-        try:
-          if row[0] == 'id':
-            last_id = 0
-          else:
-            last_id = int(row[0])
-        except IndexError:
-          last_id = 0
-      else:
-        break
-  return last_id
-
 
 if __name__ == "__main__":
   main()
