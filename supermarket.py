@@ -21,9 +21,13 @@ class Supermarket:
     ############ DONE
     def read_file(self, file_name) -> list:
         '''
-        Reads the csv file and exports its in a dict.
-        @returns dict with key id, remaining column values in nested dict
-        @param filename in string with relative path
+        Reads the csv file and exports its in a dictionary.
+        
+        Arguments:
+        file_name -- name of the file that needs to be read. Path relative to main directory.
+        
+        Returns:
+        dict -- id is the key. remainder of fields are saved in value
         '''        
         with open(file_name, newline='') as f:
             reader = csv.DictReader(f)
@@ -50,10 +54,15 @@ class Supermarket:
                     
             return output
         
-    #Done rewritten
     def get_report_inventory(self, asked_date:str):
         '''
         Display a table which contains every inventory item
+        
+        Arguments: 
+        asked_date -- datetime object
+        
+        Returns:
+        rich.table object
         '''
         asked_date = date.fromisoformat(asked_date)
         
@@ -86,9 +95,17 @@ class Supermarket:
                   
         return table
     
-    #Done rewritten
-    def get_inventory(self):
-        #returns dict {product_id: product_count_in_inventory}
+
+    def get_inventory(self) -> dict:
+        '''
+        Get the total inventory
+        
+        Arguments:
+        None
+        
+        Returns:
+        dict -- dictionary, key = product id, value = amount not sold yet
+        '''
         inventory = {}
         sold_products = self.sold.values()
         sold_product_ids = []
@@ -105,14 +122,19 @@ class Supermarket:
                 inventory[key] = value['purchase_count']
         return inventory
     
-    #Done rewritten
-    def get_costs_sold(self, start_date='1970-01-01', end_date='2200-12-12'):
+    
+    def get_costs_sold(self, start_date, end_date):
         '''
-        Get the cost of the sold products
-        returns a integer
+        Get the sum of the cost of the sold products
+        
+        Arguments:
+        start_date -- datetime object with the start of the period
+        end_date -- datetime object with the end date of the period
+            When needed one specifiek date, start_date as to equal end_date
+        
+        Returns:
+        int -- Integer containing the sum of the costs
         '''
-        start_date = date.fromisoformat(start_date)
-        end_date = date.fromisoformat(end_date)
         
         total_costs = 0
         for key, value in self.sold.items():
@@ -122,13 +144,18 @@ class Supermarket:
                 
         return total_costs
 
-    # Done rewritten
-    def get_revenue_sold(self, start_date='1970-01-01', end_date='2022-12-12'):
+    def get_revenue_sold(self, start_date, end_date):
         '''
         Get the revenue of the sold products
+        
+        Arguments:
+        start_date -- datetime object with the start of the period
+        end_date -- datetime object with the end date of the period
+            When needed one specifiek date, start_date as to equal end_date
+        
+        Returns:
+        int -- Integer containing the sum of the revenue
         '''
-        start_date = date.fromisoformat(start_date)
-        end_date = date.fromisoformat(end_date)
         
         total_revenue = 0
         for key, value in self.sold.items():
@@ -137,12 +164,19 @@ class Supermarket:
                 total_revenue += (value['selling_count'] * value['selling_price'])
         return total_revenue
 
-    ##################################
-    # Rewritten
-    ##################################
-    def buy_product(self, product_name, price, amount, expiration_date):
+
+    def buy_product(self, product_name:str, price:float, amount:int, expiration_date) -> bool:
         '''
-        Buy a product, but first check if it doesn't exist
+        Buy a product
+        
+        Arguments:
+        product_name -- name of the product bought
+        price -- price of the product bought
+        amount -- number of products bought
+        expiration_date -- string representation of the date yyyy-mm-dd
+        
+        Returns:
+        boolean
         '''
         # Check if there is a product width the same price and experation date
         expiration_date = date.fromisoformat(expiration_date)
@@ -163,11 +197,15 @@ class Supermarket:
    
         return True
 
-    #Rewritten this function
     def get_product_id(self, product_name):
         '''
         Get the product id when a product name is given
-        @returns a list with product id's that have the product_name
+        
+        Arguments:
+        product_name -- name of the product
+        
+        Returns:
+        int -- representing product ID if exists, else returns -1
         '''
         product_ids = []
         for key, value in self.bought.items():
@@ -175,16 +213,22 @@ class Supermarket:
                 product_ids.append(key)
         if len(product_ids) > 0:
             return product_ids
-        return 'no key found'
+        return -1
 
-    ##################################
-    # Has been rewritten
-    ##################################
     def sell_product(self, product_name, amount, price):
-        #check if there is enough in inventory
-        #check if multiple experation dates are in inventory, in other words. are there multiple product id's in the inventory with the same name
+        '''
+        Selling products
         
-        #if spread over multiple experiation date, split the sell-assignments
+        Arguments:
+        product_name -- name of the product
+        amount -- amount sold
+        price -- price for which it is sold
+        
+        Returns:
+        boolean, message
+            True, 'Ok' on succes
+            False, error message on failure
+        '''
         
         product_ids = self.get_product_id(product_name)
         print(product_name, amount, price)
@@ -219,12 +263,18 @@ class Supermarket:
                     }
                 inventory[product_id] = 0
                 amount -= sell_out_amount
-        return True
+        return True, 'Ok'
 
     # Did not need to be rewritten
     def get_latest_id(self, infile='sold'):
         '''
-        Get the latest id code
+        Get the latest id
+        
+        Arguments:
+        infile -- which file needs to be searched for the string
+        
+        Returns:
+        int -- biggest integer used as key
         '''
         if infile == 'sold':
             return max(self.sold.keys())
@@ -235,6 +285,14 @@ class Supermarket:
     def get_costs_expired(self, start_date='1970-01-01', end_date='2200-01-01'):
         '''
         Get the cost of the expired products
+        
+        Arguments:
+        start_date -- datetime object with the start of the period
+        end_date -- datetime object with the end date of the period
+            When needed one specifiek date, start_date as to equal end_date
+        
+        Returns:
+        int -- Integer containing the sum of the costs of expired products
         '''
         total_costs = 0
         start_date = date.fromisoformat(start_date)
@@ -251,6 +309,15 @@ class Supermarket:
     def write_file(self, file_name, data):
         '''
         Write data to the file, rewrite the whole file for now
+        
+        Arguments:
+        file_name -- name of the file needs to be written
+        data -- 
+        
+        Returns:
+        boolean
+            True, 'Ok' on succes
+            False, error message on failure
         '''
 
         with open(file_name, 'r') as f:
