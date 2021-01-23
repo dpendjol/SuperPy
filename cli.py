@@ -7,7 +7,7 @@ def main():
   
 
 # Getting the correct data from the CLI and calling the function including the arguments belonging to that function from the CLI
-def get_args() -> dict:
+def get_args():
   parser = argparse.ArgumentParser()
   subparser = parser.add_subparsers(dest="command")
 # Everthing that had to do with shifting time

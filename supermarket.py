@@ -1,24 +1,27 @@
 import csv
 from datetime import date
-from rich.console import Console
+from os import getcwd
+from dates import get_current_date
 from rich.table import Table
 
 class Supermarket:
-    _BOUGHT = 'bought.csv'
-    _SOLD = 'sold.csv'
-    _CURR_date = date.today()
+    '''
+    Create a instance of a supermarket
+    Provide 2 files, one for bought products, one for sold products
+    '''
+    _CURR_date = get_current_date('date.txt')
     
-    def __init__(self):
+    def __init__(self, bought_file, sold_file):
         
-        self._BOUGHT = 'bought.csv'
-        self._SOLD = 'sold.csv'
         self._CURR_date = date.today()
+        self.main_dir = getcwd()
+        self.subdir = 'src'
+        self.bought_file = bought_file
+        self.sold_file = sold_file
         
-        # Read data from file
         self.bought = self.read_file(Supermarket._BOUGHT)
         self.sold = self.read_file(Supermarket._SOLD)
 
-    ############ DONE
     def read_file(self, file_name) -> list:
         '''
         Reads the csv file and exports its in a dictionary.
@@ -195,7 +198,7 @@ class Supermarket:
             'purchase_date': Supermarket._CURR_date
         }
    
-        return True
+        return True, 'Ok'
 
     def get_product_id(self, product_name):
         '''

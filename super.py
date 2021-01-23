@@ -5,7 +5,7 @@ from rich.console import Console
 from datetime import date
 from dates import get_current_date, shift_date, is_valid_date
 
-mysuper = Supermarket()
+mysuper = Supermarket('bought.csv', 'sold.csv')
 myconsole = Console()
 
 date_file = 'date.txt'
