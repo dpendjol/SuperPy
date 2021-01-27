@@ -31,6 +31,16 @@ def is_valid_date(input_date: str) -> bool:
         raise ValueError
 
 
+def get_dates_month(mydate: str):
+    '''get first and last day of month'''
+    year = int(mydate.split("-")[0])
+    month = int(mydate.split("-")[1])
+    max_days = (date(year, month + 1, 1) - date(year, month, 1)).days
+    first_day = is_valid_date(mydate + "-01")
+    last_day = is_valid_date(mydate + "-" + str(max_days))
+    return first_day, last_day
+
+
 def get_current_date(file_name):
     '''
     Get the current date from a file

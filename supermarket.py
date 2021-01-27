@@ -179,7 +179,6 @@ class Supermarket:
         for value in self.sold.values():
             check_date = value['selling_date']
             if start_date <= check_date <= end_date:
-                print(value['selling_count'])
                 total_revenue += (value['selling_count']
                                   * value['selling_price'])
         return total_revenue
@@ -252,19 +251,40 @@ class Supermarket:
 
         product_ids = self.get_product_id(product_name)
         inventory = self.get_inventory()
-        bought_items = {k: v for k, v in sorted(self.bought.items(),
-                        key=lambda item: item[1]['expiration_date'])}
-        
+        # bought_items = {k: v for k, v in sorted(self.bought.items(),
+        #                key=lambda item: item[1]['expiration_date'])}
+
         if product_ids == -1:
             raise Exception('Error: Product not in stock')
 
         total_amount = 0
         for product_id in product_ids:
-            if bought_items[product_id]['expiration_date'] > self._CURR_date:
+            if self.bought[product_id]['expiration_date'] > self._CURR_date:
                 total_amount += inventory[product_id]
 
         if total_amount == 0:
             raise Exception('Error: Product no longer in stock')
+
+        # If the --amount argument is not used
+        # we want to sell all the products
+        # that equals the --product-name argument
+        if amount is None:
+            check = None
+            while not (check == 'n' or check == 'y'):
+                check = input('Do you want to sell all the {}? [y/n] '
+                              .format(self.bought[product_id]['product_name']))
+                if check == 'n':
+                    return
+            for product_id in product_ids:
+                new_id = int(self.get_latest_id('sold')) + 1
+                if inventory[product_id] > 0:
+                    self.sold[str(new_id)] = {
+                        'product_id': product_id,
+                        'selling_count': inventory[product_id],
+                        'selling_date': Supermarket._CURR_date,
+                        'selling_price': price
+                        }
+            return True, 'OK, product sold out now'
 
         if total_amount < amount:
             if total_amount == 0:
@@ -274,7 +294,7 @@ class Supermarket:
             return 'Not enough in stock'
 
         for product_id in product_ids:
-            if bought_items[product_id]['expiration_date'] > self._CURR_date:
+            if self.bought[product_id]['expiration_date'] > self._CURR_date:
                 if inventory[product_id] >= amount:
                     new_id = int(self.get_latest_id('sold')) + 1
                     self.sold[str(new_id)] = {

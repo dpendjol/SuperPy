@@ -1,4 +1,5 @@
 id,product_name,purchase_count,purchase_price,expiration_date,purchase_date
 1,orange,1,0.8,2020-01-02,2020-01-01
-2,wine,7,22.5,2020-02-02,2020-01-01
+2,wine,7,0.5,2020-02-02,2020-01-01
 3,apples,2,0.8,2020-02-01,2020-01-01
+4,wine,14,0.5,2020-03-02,2020-01-01

@@ -1,15 +1,15 @@
 from supermarket import Supermarket
 from cli import get_args
 from rich.console import Console
-from datetime import date, timedelta
-from dates import get_current_date, shift_date, is_valid_date, set_date
+from datetime import timedelta
+from dates import get_current_date, shift_date, is_valid_date, set_date, \
+                  get_dates_month
 
 bought_file = 'bought.csv'
 sold_file = 'sold.csv'
 
 mysuper = Supermarket('bought.csv', 'sold.csv')
 myconsole = Console()
-print(mysuper.bought)
 date_file = 'date.txt'
 
 args = get_args()
@@ -60,44 +60,51 @@ if args.command == 'report' and args.subcommand == 'revenue':
         print("Today's revenue so far: ", report)
     if args.yesterday:
         asked_date = shift_date(date_file, -1)
-        print(asked_date)
         report = mysuper.get_revenue_sold(asked_date, asked_date)
         print("Yesterday's revenue: ", report)
     if args.date:
         if len(args.date) == 7:
-            year = int(args.date.split("-")[0])
-            month = int(args.date.split("-")[1])
-            max_days = (date(year, month + 1, 1) - date(year, month, 1)).days
-            check, first_day = is_valid_date(args.date + "-01")
-            check, last_day = is_valid_date(args.date + "-" + str(max_days))
+            first_day, last_day = get_dates_month(args.date)
             report = mysuper.get_revenue_sold(first_day, last_day)
-            print('Revenue from', args.date, report)
+            print('Revenue from ' + first_day.strftime("%b %Y") + ":", report)
         else:
-            check, message = is_valid_date(args.date)
-            if check:
+            try:
+                message = is_valid_date(args.date)
+            except ValueError as e:
+                print(e)
+            else:
                 new_date = message
                 report = mysuper.get_revenue_sold(new_date, new_date)
-                print('Revenue from ', new_date, report)
-            else:
-                print(message)
+                print('Revenue from ' + new_date.strftime("%d %b %Y") + ":",
+                      report)
 
 if args.command == "report" and args.subcommand == "profit":
-    print('calculated profit')
     curr_date = get_current_date(date_file)
-    if args.today:
-        date_one = curr_date
-    if args.yesterday:
-        date_one = curr_date + timedelta(days=-1)
-        print(date_one)
-    if args.date:
-        date_one = is_valid_date(args.date)
-    cost_sold = mysuper.get_costs_sold(date_one, date_one)
-    # Function get_costs_expired not working correctly yet
-    # cost_expired = mysuper.get_costs_expired(date_one, date_one)
-    cost_expired = 0
-    revenue = mysuper.get_revenue_sold(date_one, date_one)
-    print(revenue, cost_expired, cost_sold)
-    print(revenue - cost_expired - cost_sold)
+    first_day = None
+    last_day = None
+    try:
+        if args.today:
+            first_day = curr_date
+        if args.yesterday:
+            first_day = curr_date + timedelta(days=-1)
+        if args.date:
+            if len(args.date) == 7:
+                first_day, last_day = get_dates_month(args.date)
+            else:
+                first_day = is_valid_date(args.date)
+        if not last_day:
+            last_day = first_day
+        cost_sold = mysuper.get_costs_sold(first_day, last_day)
+    except NameError:
+        print("Please use the --yesterday/--yesterday/--date \
+              [yyyy-mm-dd] arguments")
+    else:
+        # Function get_costs_expired not working correctly yet
+        # cost_expired = mysuper.get_costs_expired(date_one, date_one)
+        cost_expired = 0
+        revenue = mysuper.get_revenue_sold(first_day, last_day)
+        # print(revenue, cost_expired, cost_sold)
+        print(revenue - cost_expired - cost_sold)
 
 if args.advance_time:
     shifted = shift_date(date_file, args.advance_time)
