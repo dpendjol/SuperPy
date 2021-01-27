@@ -126,15 +126,17 @@ class Supermarket:
             if item['selling_date'] <= asked_date:
                 sold_product_ids.append(item['product_id'])
                 try:
-                    sold_products_info[item['product_id']] = sold_products_info[item['product_id']] + item['selling_count']
+                    sold_products_info[item['product_id']] = \
+                        sold_products_info[item['product_id']] \
+                        + item['selling_count']
                 except KeyError:  # when product is not yet in sold_products
-                    sold_products_info[item['product_id']] = item['selling_count']
+                    sold_products_info[item['product_id']] = \
+                        item['selling_count']
 
-        print('Sold product info: ', sold_products_info)
         for key, value in self.bought.items():
             if key in sold_product_ids:
-                inventory[key] = value['purchase_count']
-                - sold_products_info[key]
+                inventory[key] = value['purchase_count'] \
+                    - sold_products_info[key]
             else:
                 inventory[key] = value['purchase_count']
 
@@ -156,8 +158,9 @@ class Supermarket:
         for value in self.sold.values():
             check_date = value['selling_date']
             if start_date <= check_date <= end_date:
-                total_costs += (self.bought[value['product_id']]['purchase_price']
-                                * value['selling_count'])
+                total_costs += \
+                    self.bought[value['product_id']]['purchase_price'] \
+                    * value['selling_count']
 
         return total_costs
 
@@ -249,18 +252,19 @@ class Supermarket:
 
         product_ids = self.get_product_id(product_name)
         inventory = self.get_inventory()
-        print(inventory)
+        bought_items = {k: v for k, v in sorted(self.bought.items(),
+                        key=lambda item: item[1]['expiration_date'])}
+        
         if product_ids == -1:
             raise Exception('Error: Product not in stock')
 
-        # Check if there are enough in stock
         total_amount = 0
         for product_id in product_ids:
-            if self.bought[product_id]['expiration_date'] > self._CURR_date:
+            if bought_items[product_id]['expiration_date'] > self._CURR_date:
                 total_amount += inventory[product_id]
 
         if total_amount == 0:
-            raise Exception('Error: Product not in stock')
+            raise Exception('Error: Product no longer in stock')
 
         if total_amount < amount:
             if total_amount == 0:
@@ -270,7 +274,7 @@ class Supermarket:
             return 'Not enough in stock'
 
         for product_id in product_ids:
-            if self.bought[product_id]['expiration_date'] > self._CURR_date:
+            if bought_items[product_id]['expiration_date'] > self._CURR_date:
                 if inventory[product_id] >= amount:
                     new_id = int(self.get_latest_id('sold')) + 1
                     self.sold[str(new_id)] = {

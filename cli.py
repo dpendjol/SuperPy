@@ -80,7 +80,6 @@ def get_args():
         )
     buy_parser.add_argument(
         "-a", "--amount",
-        required=True,
         type=int,
         help="how many items dit you bought"
         )

@@ -20,9 +20,15 @@ def is_valid_date(input_date: str) -> bool:
     '''
     try:
         date_format = date.fromisoformat(input_date)
-        return (True, date_format)
+        return date_format
     except ValueError as e:
-        return (False, e)
+        if "Invalid isoformat string:" in e.args[0]:
+            raise ValueError('ERROR: input date as follow yyyy-mm-dd')
+        if "month must be in" in e.args[0]:
+            raise ValueError('ERROR: ' + e.args[0])
+        if "day is out of range" in e.args[0]:
+            raise ValueError('ERROR: ' + e.args[0])
+        raise ValueError
 
 
 def get_current_date(file_name):
@@ -37,12 +43,11 @@ def get_current_date(file_name):
     '''
     with open(file_name, 'r') as f:
         read_date = f.readline().strip()
-        is_valid, message = is_valid_date(read_date)
-        if is_valid:
-            return message
-        else:
-            print(message)
-            return
+        try:
+            message = is_valid_date(read_date)
+        except ValueError as e:
+            print(e)
+        return message
 
 
 def set_date(file_name, datestring):

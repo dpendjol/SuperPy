@@ -9,23 +9,29 @@ sold_file = 'sold.csv'
 
 mysuper = Supermarket('bought.csv', 'sold.csv')
 myconsole = Console()
-
+print(mysuper.bought)
 date_file = 'date.txt'
 
 args = get_args()
 
-myconsole.print('#' * 50)
-myconsole.print('# Arguments', args)
-myconsole.print('#' * 50)
+# myconsole.print('#' * 50)
+# myconsole.print('# Arguments', args)
+# myconsole.print('#' * 50)
 
 if args.command == 'buy':
-    check, message = is_valid_date(args.expiration_date)
-    if check:
-        mysuper.buy_product(args.product_name, args.price, args.amount,
+    try:
+        mydate = is_valid_date(args.expiration_date)
+        if mydate <= mysuper._CURR_date:
+            print('ERROR: product is already expired')
+            exit()
+    except ValueError as e:
+        print(e)
+    else:
+        amount = args.amount if args.amount else 1
+        mysuper.buy_product(args.product_name, args.price, amount,
                             args.expiration_date)
         mysuper.write_file(bought_file, mysuper.bought)
-    else:
-        print(message)
+        print('OK')
 
 if args.command == 'sell':
     try:
@@ -35,17 +41,15 @@ if args.command == 'sell':
     else:
         mysuper.write_file(sold_file, mysuper.sold)
         print('OK')
+
 if args.command == 'report' and args.subcommand == 'inventory':
     mydate = get_current_date(date_file)
+    if args.now:
+        pass
     if args.yesterday:
         mydate += timedelta(days=-1)
     if args.date is not None:
-        check, message = is_valid_date(args.date)
-        if check:
-            mydate = message
-        else:
-            print(message)
-    print(mydate)
+        mydate = is_valid_date(args.date)
     mysuper.get_report_inventory(mydate)
 
 if args.command == 'report' and args.subcommand == 'revenue':
@@ -98,5 +102,3 @@ if args.command == "report" and args.subcommand == "profit":
 if args.advance_time:
     shifted = shift_date(date_file, args.advance_time)
     set_date(date_file, shifted)
-
-print('done')
