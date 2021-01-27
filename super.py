@@ -22,15 +22,20 @@ myconsole.print('#' * 50)
 if args.command == 'buy':
     check, message = is_valid_date(args.expiration_date)
     if check:
-        mysuper.buy_product(args.product_name, args.price, args.amount, args.expiration_date)
+        mysuper.buy_product(args.product_name, args.price, args.amount, 
+                            args.expiration_date)
         mysuper.write_file(bought_file, mysuper.bought)
     else:
         print(message)
 
 if args.command == 'sell':
-    mysuper.sell_product(args.product_name, args.amount, args.price)
-    mysuper.write_file(sold_file, mysuper.sold)
-
+    try:
+        mysuper.sell_product(args.product_name, args.amount, args.price)
+    except Exception as e:
+        print(e)
+    else:
+        mysuper.write_file(sold_file, mysuper.sold)
+        print('OK')
 if args.command == 'report' and args.subcommand == 'inventory':
     mydate = get_current_date(date_file)
     if args.yesterday:
@@ -78,12 +83,19 @@ if args.command == "report" and args.subcommand == "profit":
     curr_date = get_current_date(date_file)
     if args.today:
         date_one = curr_date
-        cost_sold = mysuper.get_costs_sold(date_one, date_one)
-        cost_expired = mysuper.get_costs_expired(date_one, date_one)
-        revenue = mysuper.get_revenue_sold(date_one, date_one)
-        print(revenue, cost_expired,cost_sold)
-        print(revenue - cost_expired - cost_sold)
-    
+    if args.yesterday:
+        date_one = curr_date + timedelta(days=-1)
+        print(date_one)
+    if args.date:
+        date_one = is_valid_date(args.date)
+    cost_sold = mysuper.get_costs_sold(date_one, date_one)
+    # Function get_costs_expired not working correctly yet
+    # cost_expired = mysuper.get_costs_expired(date_one, date_one)
+    cost_expired = 0
+    revenue = mysuper.get_revenue_sold(date_one, date_one)
+    print(revenue, cost_expired, cost_sold)
+    print(revenue - cost_expired - cost_sold) 
+
 if args.advance_time:
     shifted = shift_date(date_file, args.advance_time)
     set_date(date_file, shifted)

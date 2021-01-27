@@ -15,8 +15,8 @@ class Supermarket:
     def __init__(self, bought_file: str, sold_file: str):
         
         self._CURR_date = get_current_date('date.txt')
-        self.bought_file = './'+ bought_file
-        self.sold_file = './' + sold_file
+        self.bought_file = bought_file
+        self.sold_file = sold_file
         
         self.bought = self.read_file(self.bought_file)
         self.sold = self.read_file(self.sold_file)
@@ -125,13 +125,11 @@ class Supermarket:
             if item['selling_date'] <= asked_date:
                 sold_product_ids.append(item['product_id'])
                 try:
-                    sold_products_info[item['product_id']] \
-                    = sold_products_info[item['product_id']] 
-                    + item['selling_count']
+                    sold_products_info[item['product_id']] = sold_products_info[item['product_id']] + item['selling_count']
                 except KeyError: # when product is not yet in sold_products
                     sold_products_info[item['product_id']] = item['selling_count'] 
                     
-            
+        print('Sold product info: ', sold_products_info)
         for key, value in self.bought.items():
             if key in sold_product_ids:
                 inventory[key] = value['purchase_count'] - sold_products_info[key]
@@ -251,6 +249,9 @@ class Supermarket:
         
         product_ids = self.get_product_id(product_name)
         inventory = self.get_inventory()
+        print(inventory)
+        if product_ids == -1:
+            raise Exception('Error: Product not in stock')
         
         # Check if there are enough in stock
         total_amount = 0
@@ -258,6 +259,9 @@ class Supermarket:
             if self.bought[product_id]['expiration_date'] > self._CURR_date:
                 total_amount += inventory[product_id]
         
+        if total_amount == 0:
+            raise Exception('Error: Product not in stock')
+            
         if total_amount < amount:
             if total_amount == 0:
                 print("All out")
@@ -309,6 +313,7 @@ class Supermarket:
             return 0
     
     
+    # Not working correctly yet 
     def get_costs_expired(self, start_date, end_date):
         '''
         Get the cost of the expired products
@@ -323,7 +328,7 @@ class Supermarket:
         '''
         total_costs = 0
         
-        inventory = self.get_inventory(start_date)
+        inventory = self.get_inventory()
         
         for product in inventory.keys():
             if start_date < self.bought[product]['expiration_date'] < end_date:
@@ -347,7 +352,6 @@ class Supermarket:
 
         with open(file_name, 'r') as f:
             headers = f.readline().strip().split(',')
-            
         
         with open(file_name, 'w', newline='') as f:
             writer = csv.DictWriter(f, fieldnames=headers)
