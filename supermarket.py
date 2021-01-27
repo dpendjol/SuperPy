@@ -1,7 +1,7 @@
 
 import csv
-from datetime import date
-from dates import get_current_date
+from datetime import date, timedelta
+from dates import get_current_date, get_dates_month
 from rich.table import Table
 from rich.console import Console
 
@@ -398,6 +398,30 @@ class Supermarket:
                         }
                     writer.writerow(output)
         return
+
+    def get_monthly_data(self, asked_date: str):
+        '''returns arrays of data for plotting graphs'''
+        day, last_day = get_dates_month(asked_date)
+        days = []
+        costs = []
+        revenues = []
+        profits = []
+        while not day > last_day:
+            days.append(day.strftime("%Y-%b-%d"))
+            cost = self.get_costs_sold(day, day)
+            revenue = self.get_revenue_sold(day, day)
+            costs.append(cost)
+            revenues.append(revenue)
+            profits.append(revenue - cost)
+            day = day + timedelta(days=1)
+        return {'days': days,
+                'costs': costs,
+                'revenue': revenues,
+                'profit': profits
+                }
+
+    def get_revenu_date_month(self, asked_date):
+        pass
 
 
 if __name__ == "__main__":
