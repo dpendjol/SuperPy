@@ -42,21 +42,19 @@ def get_current_date(file_name):
             return
         
         
-def set_date(file_name, datestring:str):
+def set_date(file_name, datestring):
     '''
-    Write date to file. Dat is written in yyyy-mm-dd
+    Write date to file.
     
     Arguments:
     file_name: filename to which the date is written with relative path
-    datestring: string containing date in format yyyy-mm-dd
+    datestring: datetime object
     
     Returns:
     None
     '''
-    check, message = is_valid_date(datestring)
-    if check:
-        with open(file_name, 'w') as f:
-            f.write(datestring)
+    with open(file_name, 'w') as f:
+        f.write(datestring.isoformat())
     return
 
 def shift_date(file_name:str, num_days:int):

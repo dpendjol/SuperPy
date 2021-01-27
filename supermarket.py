@@ -3,6 +3,7 @@ from datetime import date
 from os import getcwd
 from dates import get_current_date
 from rich.table import Table
+from rich.console import Console
 
 class Supermarket:
     '''
@@ -11,16 +12,14 @@ class Supermarket:
     '''
     _CURR_date = get_current_date('date.txt')
     
-    def __init__(self, bought_file, sold_file):
+    def __init__(self, bought_file: str, sold_file: str):
         
-        self._CURR_date = date.today()
-        self.main_dir = getcwd()
-        self.subdir = 'src'
-        self.bought_file = bought_file
-        self.sold_file = sold_file
+        self._CURR_date = get_current_date('date.txt')
+        self.bought_file = './'+ bought_file
+        self.sold_file = './' + sold_file
         
-        self.bought = self.read_file(Supermarket._BOUGHT)
-        self.sold = self.read_file(Supermarket._SOLD)
+        self.bought = self.read_file(self.bought_file)
+        self.sold = self.read_file(self.sold_file)
 
     def read_file(self, file_name) -> list:
         '''
@@ -36,7 +35,7 @@ class Supermarket:
             reader = csv.DictReader(f)
             output = {}
             
-            if file_name == Supermarket._BOUGHT:
+            if file_name == self.bought_file:
                 for line in reader:
                     output[line['id']] = {
                         'product_name': line['product_name'],
@@ -46,7 +45,7 @@ class Supermarket:
                         'purchase_date': date.fromisoformat(line['purchase_date'])
                     }
                 
-            if file_name == Supermarket._SOLD:
+            if file_name == self.sold_file:
                 for line in reader:
                     output[line['id']] = {
                         'product_id': line['product_id'],
@@ -57,7 +56,7 @@ class Supermarket:
                     
             return output
         
-    def get_report_inventory(self, asked_date:str):
+    def get_report_inventory(self, asked_date):
         '''
         Display a table which contains every inventory item
         
@@ -65,21 +64,26 @@ class Supermarket:
         asked_date -- datetime object
         
         Returns:
-        rich.table object
-        '''
-        asked_date = date.fromisoformat(asked_date)
+        None
         
+        Dependancies:
+        rich package -- install trough pip install rich
+            Needs rich.table and rich.console
+        '''
         table = Table(show_header=True, title='Inventory report')
         table.add_column('Product Name')
         table.add_column('Amount')
         table.add_column('Bought for')
         table.add_column('Expire on')
         
-        inventory = self.get_inventory()
+        inventory = self.get_inventory(asked_date)
         
         for key, value in inventory.items():
-            if not value == 0 and asked_date < self.bought[key]['expiration_date']:
-                # Only add roy if the key exists. Work-a-round for when we need a inventory from the past
+            if not value == 0 and \
+                asked_date < self.bought[key]['expiration_date']:
+                 
+                # Only add roy if the key exists. Work-a-round for when we 
+                # need a inventory from the past
                 try:
                     product = self.bought[key]
                     try:
@@ -93,13 +97,16 @@ class Supermarket:
                             str(product['purchase_price']),
                             date.isoformat(product['expiration_date'])
                         )
-                except KeyError:
+                except KeyError: # if pro
                     pass
-                  
-        return table
+                
+        myconsole = Console()
+        myconsole.print(table)
+        
+        return None
     
 
-    def get_inventory(self) -> dict:
+    def get_inventory(self, asked_date=date(2200, 1, 1)):
         '''
         Get the total inventory
         
@@ -115,14 +122,22 @@ class Supermarket:
         sold_products_info = {}
         
         for item in sold_products:
-            sold_product_ids.append(item['product_id'])
-            sold_products_info[item['product_id']] = item['selling_count']
+            if item['selling_date'] <= asked_date:
+                sold_product_ids.append(item['product_id'])
+                try:
+                    sold_products_info[item['product_id']] \
+                    = sold_products_info[item['product_id']] 
+                    + item['selling_count']
+                except KeyError: # when product is not yet in sold_products
+                    sold_products_info[item['product_id']] = item['selling_count'] 
+                    
             
         for key, value in self.bought.items():
             if key in sold_product_ids:
                 inventory[key] = value['purchase_count'] - sold_products_info[key]
             else:
                 inventory[key] = value['purchase_count']
+        
         return inventory
     
     
@@ -159,11 +174,11 @@ class Supermarket:
         Returns:
         int -- Integer containing the sum of the revenue
         '''
-        
         total_revenue = 0
         for key, value in self.sold.items():
             check_date = value['selling_date']
             if start_date <= check_date <= end_date:
+                print(value['selling_count'])
                 total_revenue += (value['selling_count'] * value['selling_price'])
         return total_revenue
 
@@ -182,6 +197,7 @@ class Supermarket:
         boolean
         '''
         # Check if there is a product width the same price and experation date
+        
         expiration_date = date.fromisoformat(expiration_date)
         
         for key, value in self.bought.items():    
@@ -234,38 +250,43 @@ class Supermarket:
         '''
         
         product_ids = self.get_product_id(product_name)
-        print(product_name, amount, price)
-        print(product_ids)
         inventory = self.get_inventory()
         
-        #is there enough
+        # Check if there are enough in stock
         total_amount = 0
         for product_id in product_ids:
-            total_amount += inventory[product_id]
+            if self.bought[product_id]['expiration_date'] > self._CURR_date:
+                total_amount += inventory[product_id]
         
         if total_amount < amount:
+            if total_amount == 0:
+                print("All out")
+            else:
+                print("Sorry, just got " + str(total_amount) + " left")
             return 'Not enough in stock'
         
         for product_id in product_ids:
-            if inventory[product_id] >= amount:
-                new_id = int(self.get_latest_id('sold')) + 1
-                self.sold[str(new_id)] = {
-                    'product_id': product_id,
-                    'selling_count': amount,
-                    'selling_date': Supermarket._CURR_date,
-                    'selling_price': price
-                    }
-            elif inventory[product_id] > 0:
-                sell_out_amount = inventory[product_id]                
-                new_id = int(self.get_latest_id('sold')) + 1
-                self.sold[str(new_id)] = {
-                    'product_id': product_id,
-                    'selling_count': sell_out_amount,
-                    'selling_date': Supermarket._CURR_date,
-                    'selling_price': price
-                    }
-                inventory[product_id] = 0
-                amount -= sell_out_amount
+            if self.bought[product_id]['expiration_date'] > self._CURR_date:
+                if inventory[product_id] >= amount:
+                    new_id = int(self.get_latest_id('sold')) + 1
+                    self.sold[str(new_id)] = {
+                        'product_id': product_id,
+                        'selling_count': amount,
+                        'selling_date': Supermarket._CURR_date,
+                        'selling_price': price
+                        }
+                    break
+                elif inventory[product_id] > 0:
+                    sell_out_amount = inventory[product_id]                
+                    new_id = int(self.get_latest_id('sold')) + 1
+                    self.sold[str(new_id)] = {
+                        'product_id': product_id,
+                        'selling_count': sell_out_amount,
+                        'selling_date': Supermarket._CURR_date,
+                        'selling_price': price
+                        }
+                    inventory[product_id] = 0
+                    amount -= sell_out_amount
         return True, 'Ok'
 
     # Did not need to be rewritten
@@ -279,13 +300,16 @@ class Supermarket:
         Returns:
         int -- biggest integer used as key
         '''
-        if infile == 'sold':
-            return max(self.sold.keys())
-        elif infile == 'bought':
-            return max(self.bought.keys())
+        try:
+            if infile == 'sold':
+                return max(self.sold.keys())
+            elif infile == 'bought':
+                return max(self.bought.keys())
+        except ValueError:
+            return 0
     
     
-    def get_costs_expired(self, start_date='1970-01-01', end_date='2200-01-01'):
+    def get_costs_expired(self, start_date, end_date):
         '''
         Get the cost of the expired products
         
@@ -298,10 +322,8 @@ class Supermarket:
         int -- Integer containing the sum of the costs of expired products
         '''
         total_costs = 0
-        start_date = date.fromisoformat(start_date)
-        end_date = date.fromisoformat(end_date)
         
-        inventory = self.get_inventory()
+        inventory = self.get_inventory(start_date)
         
         for product in inventory.keys():
             if start_date < self.bought[product]['expiration_date'] < end_date:
@@ -330,7 +352,7 @@ class Supermarket:
         with open(file_name, 'w', newline='') as f:
             writer = csv.DictWriter(f, fieldnames=headers)
             writer.writeheader()
-            if file_name == Supermarket._BOUGHT:
+            if file_name == self.bought_file:
                 for key, value in  data.items():
                     output = {
                         headers[0]: key, 
@@ -341,14 +363,14 @@ class Supermarket:
                         headers[5]: value['purchase_date']
                         }
                     writer.writerow(output)
-            if file_name == Supermarket._SOLD:
+            if file_name == self.sold_file:
                 for key, value in  data.items():
                     output = {
                         headers[0]: key, 
                         headers[1]: value['product_id'],
                         headers[2]: value['selling_count'],
-                        headers[3]: value['selling_price'],
-                        headers[4]: value['selling_date']
+                        headers[3]: value['selling_date'],
+                        headers[4]: value['selling_price']
                         }
                     writer.writerow(output)
         return
