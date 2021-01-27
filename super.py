@@ -1,6 +1,5 @@
 from supermarket import Supermarket
 from cli import get_args
-from supermarket import Supermarket
 from rich.console import Console
 from datetime import date, timedelta
 from dates import get_current_date, shift_date, is_valid_date, set_date
@@ -22,7 +21,7 @@ myconsole.print('#' * 50)
 if args.command == 'buy':
     check, message = is_valid_date(args.expiration_date)
     if check:
-        mysuper.buy_product(args.product_name, args.price, args.amount, 
+        mysuper.buy_product(args.product_name, args.price, args.amount,
                             args.expiration_date)
         mysuper.write_file(bought_file, mysuper.bought)
     else:
@@ -48,7 +47,7 @@ if args.command == 'report' and args.subcommand == 'inventory':
             print(message)
     print(mydate)
     mysuper.get_report_inventory(mydate)
-    
+
 if args.command == 'report' and args.subcommand == 'revenue':
     report = 0
     if args.today:
@@ -69,7 +68,7 @@ if args.command == 'report' and args.subcommand == 'revenue':
             check, last_day = is_valid_date(args.date + "-" + str(max_days))
             report = mysuper.get_revenue_sold(first_day, last_day)
             print('Revenue from', args.date, report)
-        else:   
+        else:
             check, message = is_valid_date(args.date)
             if check:
                 new_date = message
@@ -77,7 +76,7 @@ if args.command == 'report' and args.subcommand == 'revenue':
                 print('Revenue from ', new_date, report)
             else:
                 print(message)
-    
+
 if args.command == "report" and args.subcommand == "profit":
     print('calculated profit')
     curr_date = get_current_date(date_file)
@@ -94,7 +93,7 @@ if args.command == "report" and args.subcommand == "profit":
     cost_expired = 0
     revenue = mysuper.get_revenue_sold(date_one, date_one)
     print(revenue, cost_expired, cost_sold)
-    print(revenue - cost_expired - cost_sold) 
+    print(revenue - cost_expired - cost_sold)
 
 if args.advance_time:
     shifted = shift_date(date_file, args.advance_time)
