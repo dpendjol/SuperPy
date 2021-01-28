@@ -1,0 +1,13 @@
+usage: super.py [-h] [--advance-time ADVANCE_TIME] {report,sell,buy} ...
+
+positional arguments:
+  {report,sell,buy}
+    report              report command
+    sell                sell command
+    buy                 buy command
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --advance-time ADVANCE_TIME
+                        specify how many day's you want to shift time, use the
+                        minus sign (-) for days to the past
