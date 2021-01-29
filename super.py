@@ -5,18 +5,10 @@ from datetime import timedelta
 from dates import get_current_date, shift_date, is_valid_date, set_date, \
                   get_dates_month
 
-bought_file = 'bought.csv'
-sold_file = 'sold.csv'
-
 mysuper = Supermarket('bought.csv', 'sold.csv')
 myconsole = Console()
-date_file = 'date.txt'
 
 args = get_args()
-
-# myconsole.print('#' * 50)
-# myconsole.print('# Arguments', args)
-# myconsole.print('#' * 50)
 
 if args.command == 'buy':
     try:
@@ -30,7 +22,7 @@ if args.command == 'buy':
         amount = args.amount if args.amount else 1
         mysuper.buy_product(args.product_name, args.price, amount,
                             args.expiration_date)
-        mysuper.write_file(bought_file, mysuper.bought)
+        mysuper.write_file(mysuper.bought_file, mysuper.bought)
         print('OK')
 
 if args.command == 'sell':
@@ -39,11 +31,11 @@ if args.command == 'sell':
     except Exception as e:
         print(e)
     else:
-        mysuper.write_file(sold_file, mysuper.sold)
+        mysuper.write_file(mysuper.sold_file, mysuper.sold)
         print('OK')
 
 if args.command == 'report' and args.subcommand == 'inventory':
-    mydate = get_current_date(date_file)
+    mydate = get_current_date(mysuper.date_file)
     if args.now:
         pass
     if args.yesterday:
@@ -55,11 +47,11 @@ if args.command == 'report' and args.subcommand == 'inventory':
 if args.command == 'report' and args.subcommand == 'revenue':
     report = 0
     if args.today:
-        curr_date = get_current_date(date_file)
+        curr_date = get_current_date(mysuper.date_file)
         report = mysuper.get_revenue_sold(curr_date, curr_date)
         print("Today's revenue so far: ", report)
     if args.yesterday:
-        asked_date = shift_date(date_file, -1)
+        asked_date = shift_date(mysuper.date_filedate_file, -1)
         report = mysuper.get_revenue_sold(asked_date, asked_date)
         print("Yesterday's revenue: ", report)
     if args.date:
@@ -79,7 +71,7 @@ if args.command == 'report' and args.subcommand == 'revenue':
                       report)
 
 if args.command == "report" and args.subcommand == "profit":
-    curr_date = get_current_date(date_file)
+    curr_date = get_current_date(mysuper.date_file)
     first_day = None
     last_day = None
     try:
@@ -107,5 +99,5 @@ if args.command == "report" and args.subcommand == "profit":
         print(revenue - cost_expired - cost_sold)
 
 if args.advance_time:
-    shifted = shift_date(date_file, args.advance_time)
-    set_date(date_file, shifted)
+    shifted = shift_date(mysuper.date_file, args.advance_time)
+    set_date(mysuper.date_file, shifted)

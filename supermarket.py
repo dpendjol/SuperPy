@@ -4,19 +4,33 @@ from datetime import date, timedelta
 from dates import get_current_date, get_dates_month
 from rich.table import Table
 from rich.console import Console
+from os import path, getcwd
+from file_check import check_files
 
 
 class Supermarket:
     '''Create a instance of a supermarket
     Provide 2 files, one for bought products, one for sold products
     '''
-    _CURR_date = get_current_date('date.txt')
 
     def __init__(self, bought_file: str, sold_file: str):
 
-        self._CURR_date = get_current_date('date.txt')
-        self.bought_file = bought_file
-        self.sold_file = sold_file
+        working_directory = getcwd()
+        data_folder = 'data'
+        bought_file = 'bought.csv'
+        sold_file = 'sold.csv'
+        date_file = 'data.txt'
+
+        # Check if the nessesary files exist, if not, then create them
+        check_files(working_directory, data_folder, data=date_file,
+                    sold=sold_file, bought=bought_file)
+
+        self._CURR_date = get_current_date(
+            path.join(data_folder, date_file)
+        )
+        self.bought_file = path.join(data_folder, bought_file)
+        self.sold_file = path.join(data_folder, sold_file)
+        self.date_file = path.join(data_folder, date_file)
 
         self.bought = self.read_file(self.bought_file)
         self.sold = self.read_file(self.sold_file)
@@ -251,8 +265,6 @@ class Supermarket:
 
         product_ids = self.get_product_id(product_name)
         inventory = self.get_inventory()
-        # bought_items = {k: v for k, v in sorted(self.bought.items(),
-        #                key=lambda item: item[1]['expiration_date'])}
 
         if product_ids == -1:
             raise Exception('Error: Product not in stock')
