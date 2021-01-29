@@ -153,7 +153,6 @@ class Supermarket:
                     - sold_products_info[key]
             else:
                 inventory[key] = value['purchase_count']
-        print(inventory)
         return inventory
 
     def get_expired_items(self, asked_date: str, inventory):
@@ -197,15 +196,16 @@ class Supermarket:
                       title='Expired report', title_style="frame bold blue",
                       title_justify="left")
         table.add_column('Product Name')
-        table.add_column('Number of products')
-        table.add_column('Loss in euro', str(total_costs))
+        table.add_column('Number of products', justify="right")
+        table.add_column('Loss in euro', str(format(total_costs, ".2f")), justify="right")
+        table.add_column("Expired on", justify="right")
 
         for k, v in dict_expired_items.items():
             product_costs = round(self.bought[k]['purchase_price'] * v, 2)
             table.add_row(self.bought[k]['product_name'],
                           str(v),
-                          str(product_costs))
-
+                          str(format(product_costs, ".2f")),
+                          self.bought[k]['expiration_date'].isoformat())
         myconsole = Console()
         myconsole.print(table)
 
@@ -223,7 +223,6 @@ class Supermarket:
         output = {}
         sold = filter(lambda x: first_day <= x[1]['selling_date'] <= last_day, 
                       self.sold.items())
-        print(sold)
         for product in dict(sold).values():
             id = product['product_id']
             product_name = self.bought[id]['product_name']
