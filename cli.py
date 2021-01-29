@@ -3,13 +3,16 @@ import argparse
 
 def main():
     args = get_args()
-    print("Arguments: \n", args, "\n", 20 * r"\_/", "\n")
-
-# Getting the correct data from the CLI and calling the function including the
-# arguments belonging to that function from the CLI
+    print(args)
 
 
 def get_args():
+    '''
+    Get de arguments given by the user on the command line
+
+    Returns:
+    Arguments namespace
+    '''
     parser = argparse.ArgumentParser()
     subparser = parser.add_subparsers(dest="command")
 # Everthing that had to do with shifting time
@@ -20,82 +23,38 @@ def get_args():
         use the minus sign (-) for days to the past"
         )
 # Everything that has to do with the report command
-    report_parser = subparser.add_parser(
-        "report",
-        help="report command"
-        )
+    report_parser = subparser.add_parser("report", help="report command")
     report_parser.add_argument("subcommand",
                                choices=["inventory", "revenue", "profit"],
-                               help="Choose which report you want to see"
-                               )
+                               help="Choose which report you want to see")
 # Choose to create a group, only one of the arguments can be used at one time
     time_group = report_parser.add_mutually_exclusive_group()
-    time_group.add_argument(
-        "--now",
-        action="store_true",
-        help="get current inventory"
-        )
-    time_group.add_argument(
-        "--yesterday",
-        action="store_true",
-        help="get data of yesterday"
-        )
-    time_group.add_argument(
-        "--today",
-        action="store_true",
-        help="get data of today"
-        )
-    time_group.add_argument(
-        "--date",
-        type=str,
-        help="get data of date provided in format yyyy-mm")
+    time_group.add_argument("--now", action="store_true",
+                            help="get current inventory")
+    time_group.add_argument("--yesterday", action="store_true",
+                            help="get data of yesterday")
+    time_group.add_argument("--today", action="store_true",
+                            help="get data of today")
+    time_group.add_argument("--date", type=str,
+                            help="get data of date provided in format yyyy-mm")
 # Everything that has to do with the sell command
-    sell_parser = subparser.add_parser(
-        "sell",
-        help="sell command"
-        )
-    sell_parser.add_argument(
-        "-pn", "--product-name"
-        )
-    sell_parser.add_argument(
-        "-a",
-        "--amount",
-        type=int,
-        help="number of productitems sold")
-    sell_parser.add_argument(
-        "-p",
-        "--price",
-        type=float,
-        help="provide the price of the product"
-        )
+    sell_parser = subparser.add_parser("sell", help="sell command")
+    sell_parser.add_argument("--product-name", type=str, required=True,
+                             help="provide name of the product")
+    sell_parser.add_argument("--price", type=float, required=True,
+                             help="provide the price of the product")
+    sell_parser.add_argument("--amount", type=int,
+                             help="number of productitems sold")
 # Everything that had to do with the buy command
-    buy_parser = subparser.add_parser(
-        "buy",
-        help="buy command"
-        )
-    buy_parser.add_argument(
-        "-pn", "--product-name",
-        required=True, type=str,
-        help="provide name of the product"
-        )
-    buy_parser.add_argument(
-        "-a", "--amount",
-        type=int,
-        help="how many items dit you bought"
-        )
-    buy_parser.add_argument(
-        "-p", "--price",
-        required=True,
-        type=float,
-        help="provide bought price per item"
-        )
-    buy_parser.add_argument(
-        "-ed", "--expiration-date",
-        required=True
-        )
-
-    # buy_parser.add_argument("--advance-time", type=int, help="advance time
-    # by x day's")
+    buy_parser = subparser.add_parser("buy", help="buy command")
+    buy_parser.add_argument("--product-name", type=str, required=True,
+                            help="provide name of the product")
+    buy_parser.add_argument("--price", type=float, required=True,
+                            help="provide bought price per item")
+    buy_parser.add_argument("--expiration-date", required=True,
+                            help="provide expiration date as yyyy-mm-dd")
+    buy_parser.add_argument("--amount", type=int,
+                            help="how many items dit you bought")
 
     args = parser.parse_args()
 
