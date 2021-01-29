@@ -158,14 +158,14 @@ class Supermarket:
 
     def get_expired_items(self, asked_date: str, inventory):
         '''Get the experied items
-        
+
         Arguments:
         asked_date -- asked day
         inventory -- inventory list
-        
+
         Returns:
         dict -- {product_id: amount_that_expired}
-        
+
         '''
         asked_date = is_valid_date(asked_date)
         product_expired = filter(lambda item: item[1]['expiration_date'] <
@@ -175,29 +175,103 @@ class Supermarket:
         for k, v in inventory.items():
             if k in product_expired.keys():
                 output[k] = v
-        
+
         return output
     
+    def get_expired_costs(self, dict_expired_items):
+        total_costs = 0
+        for k, v in dict_expired_items.items():
+            total_costs += (self.bought[k]['purchase_price'] * v)
+        return total_costs
+
     def print_expired_items(self, dict_expired_items):
         '''Print a table which list a overview of all expired items
-        
+
         Arguments:
         dict_expired_items -- return from get_expired_items()
         '''
-        
-        table = Table(show_header=True, title='Expired report')
+        total_costs = self.get_expired_costs(dict_expired_items)
+
+        table = Table(show_header=True, header_style="green",
+                      show_footer=True, footer_style="bold red on white",
+                      title='Expired report', title_style="frame bold blue",
+                      title_justify="left")
         table.add_column('Product Name')
-        table.add_column('Amount')
-        table.add_column('Loss in euro')
-        
+        table.add_column('Number of products')
+        table.add_column('Loss in euro', str(total_costs))
+
         for k, v in dict_expired_items.items():
+            product_costs = round(self.bought[k]['purchase_price'] * v, 2)
             table.add_row(self.bought[k]['product_name'],
                           str(v),
-                          str(self.bought[k]['purchase_price'] * v))
-        
+                          str(product_costs))
+
         myconsole = Console()
         myconsole.print(table)
+
+    '''
+    def get_sold_product(self, asked_date):
+        sold_products = map(lambda product: product[1]['product_id'] )
+    '''
     
+    def _get_sold_products_by_name(self, first_day=date(1970, 1, 1), 
+                                   last_day=date(2500, 1, 1)):
+        '''
+        Get the sold product items sold between first_day till and including 
+        last_day
+        '''
+        output = {}
+        sold = filter(lambda x: first_day <= x[1]['selling_date'] <= last_day, 
+                      self.sold.items())
+        print(sold)
+        for product in dict(sold).values():
+            id = product['product_id']
+            product_name = self.bought[id]['product_name']
+            product_revenue = product['selling_count'] \
+                * product['selling_price']
+            product_costs = product['selling_count'] \
+                * self.bought[id]['purchase_price']
+            try:
+                output[product_name]['selling_count'] += \
+                    product['selling_count']
+                output[product_name]['revenue'] += product_revenue
+                output[product_name]['costs'] += product_costs
+            except KeyError:
+                output[product_name] = {
+                                    'selling_count': product['selling_count'],
+                                    'revenue': product_revenue,
+                                    'costs': product_costs
+                                    }
+        return output
+    
+    def print_sold_products(self):
+        sold_items = self._get_sold_products_by_name()
+        table = Table(show_header=True, header_style="green",
+                      show_footer=True, footer_style="bold red on white",
+                      title="Sold products", title_style="bold blue",
+                      title_justify="left")
+        
+        total_revenue = 0
+        total_costs = 0
+        
+        for item in sold_items.values():
+            total_revenue += item['revenue']
+            total_costs += item['costs']
+            
+        table.add_column("Product name")
+        table.add_column("Producs sold", justify="right")
+        table.add_column("Revenue", f"{total_revenue}", justify="right")
+        table.add_column("Costs", f"{total_costs}", justify="right")
+        
+        for k, v in sold_items.items():            
+            table.add_row(k,
+                          str(v['selling_count']),
+                          str(format(v['revenue'], ".2f")),
+                          str(format(v['costs'], ".2f"))
+                          )
+        console = Console()
+        console.print(table)
+
     def get_costs_sold(self, start_date, end_date):
         '''Get the sum of the cost of the sold products
 

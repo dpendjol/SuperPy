@@ -12,6 +12,7 @@ inventory = mysuper.get_inventory(date(2021, 1, 1))
 expired_items = mysuper.get_expired_items('2021-01-01', inventory)
 mysuper.print_expired_items(expired_items)
 
+mysuper.print_sold_products()
 
 args = get_args()
 
@@ -75,6 +76,13 @@ if args.command == 'report' and args.subcommand == 'revenue':
                 print('Revenue from ' + new_date.strftime("%d %b %Y") + ":",
                       report)
 
+if args.command == "report" and args.subcommand == "expired":
+    inventory = mysuper.get_inventory(date(2021, 1, 1))
+    expired_items = mysuper.get_expired_items('2021-01-01', inventory)
+    mysuper.print_expired_items(expired_items)
+    if args.mode == "table":
+        pass
+    
 if args.command == "report" and args.subcommand == "profit":
     curr_date = get_current_date(mysuper.date_file)
     first_day = None

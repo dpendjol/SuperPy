@@ -1,6 +1,5 @@
 from matplotlib import pyplot as plt
 from supermarket import Supermarket
-from dates import get_dates_month
 
 ''' Availible styles plot
 
@@ -89,10 +88,10 @@ def get_average_transaction_per_day(asked_date):
     return average
 
 
-def get_cost_per_day(asked_date):
+def _get_cost_per_day(asked_date):
     output = filter(lambda item: item[1]['purchase_date'] ==
                     asked_date, bought_file)
-    # for item in output.items
+    return dict(output)
 
 
 myconsole = Console()
