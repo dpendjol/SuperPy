@@ -1,7 +1,7 @@
 
 import csv
 from datetime import date, timedelta
-from dates import get_current_date, get_dates_month
+from dates import get_current_date, get_dates_month, is_valid_date
 from rich.table import Table
 from rich.console import Console
 from os import path, getcwd
@@ -13,13 +13,13 @@ class Supermarket:
     Provide 2 files, one for bought products, one for sold products
     '''
 
-    def __init__(self, bought_file: str, sold_file: str):
+    def __init__(self):
 
         working_directory = getcwd()
         data_folder = 'data'
         bought_file = 'bought.csv'
         sold_file = 'sold.csv'
-        date_file = 'data.txt'
+        date_file = 'date.txt'
 
         # Check if the nessesary files exist, if not, then create them
         check_files(working_directory, data_folder, data=date_file,
@@ -153,9 +153,51 @@ class Supermarket:
                     - sold_products_info[key]
             else:
                 inventory[key] = value['purchase_count']
-
+        print(inventory)
         return inventory
 
+    def get_expired_items(self, asked_date: str, inventory):
+        '''Get the experied items
+        
+        Arguments:
+        asked_date -- asked day
+        inventory -- inventory list
+        
+        Returns:
+        dict -- {product_id: amount_that_expired}
+        
+        '''
+        asked_date = is_valid_date(asked_date)
+        product_expired = filter(lambda item: item[1]['expiration_date'] <
+                        asked_date, self.bought.items())
+        product_expired = dict(product_expired)
+        output = {}
+        for k, v in inventory.items():
+            if k in product_expired.keys():
+                output[k] = v
+        
+        return output
+    
+    def print_expired_items(self, dict_expired_items):
+        '''Print a table which list a overview of all expired items
+        
+        Arguments:
+        dict_expired_items -- return from get_expired_items()
+        '''
+        
+        table = Table(show_header=True, title='Expired report')
+        table.add_column('Product Name')
+        table.add_column('Amount')
+        table.add_column('Loss in euro')
+        
+        for k, v in dict_expired_items.items():
+            table.add_row(self.bought[k]['product_name'],
+                          str(v),
+                          str(self.bought[k]['purchase_price'] * v))
+        
+        myconsole = Console()
+        myconsole.print(table)
+    
     def get_costs_sold(self, start_date, end_date):
         '''Get the sum of the cost of the sold products
 

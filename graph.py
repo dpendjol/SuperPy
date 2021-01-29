@@ -1,5 +1,6 @@
 from matplotlib import pyplot as plt
 from supermarket import Supermarket
+from dates import get_dates_month
 
 ''' Availible styles plot
 
@@ -61,6 +62,47 @@ def make_bar_chart(data_x, *data_y, **kwargs):
     plt.title(kwargs['title'])
     plt.legend()
     plt.show()
+
+
+def get_transactions_per_day(asked_date):
+    output = filter(lambda item: item[1]['selling_date'] ==
+                    asked_date, sold_file.items())
+    return dict(output)
+
+
+def get_number_of_transactions_per_day(asked_date: str):
+    '''Gets the number of transactions per day'''
+    output = get_transactions_per_day(asked_date)
+    number_of_transactions = len(list(output))
+    return number_of_transactions
+
+
+def get_average_transaction_per_day(asked_date):
+    output = get_transactions_per_day(asked_date)
+    total_revenue = 0
+    for item in output.values():
+        total_revenue += (item['selling_count'] * item['selling_price'])
+    try:
+        average = total_revenue / len(output)
+    except ZeroDivisionError:
+        average = 0
+    return average
+
+
+def get_cost_per_day(asked_date):
+    output = filter(lambda item: item[1]['purchase_date'] ==
+                    asked_date, bought_file)
+    # for item in output.items
+
+
+myconsole = Console()
+output = get_number_of_transactions_per_day('2021-01-01')
+output = get_expired_items('2021-01-01')
+output = get_average_transaction_per_day('2021-01-01')
+myconsole.print(output, style='')
+
+# bought_items = {k: v for k, v in sorted(self.bought.items(),
+#                key=lambda item: item[1]['expiration_date'])}
 
 
 mysuper = Supermarket("bought.csv", "sold.csv")

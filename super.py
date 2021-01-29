@@ -1,12 +1,17 @@
 from supermarket import Supermarket
 from cli import get_args
 from rich.console import Console
-from datetime import timedelta
+from datetime import timedelta, date
 from dates import get_current_date, shift_date, is_valid_date, set_date, \
                   get_dates_month
 
-mysuper = Supermarket('bought.csv', 'sold.csv')
+mysuper = Supermarket()
 myconsole = Console()
+
+inventory = mysuper.get_inventory(date(2021, 1, 1))
+expired_items = mysuper.get_expired_items('2021-01-01', inventory)
+mysuper.print_expired_items(expired_items)
+
 
 args = get_args()
 

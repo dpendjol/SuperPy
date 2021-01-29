@@ -9,7 +9,7 @@ __human_name__ = 'superpy'
 import argparse
 import csv
 from datetime import date
-import sys
+
 
 def create_datefile():
     today = date.today()
@@ -20,13 +20,13 @@ def create_datefile():
     except FileExistsError:
         print("File bestaat niet")
 
-    
+
 def main():
     with open("./bought.csv", newline="") as f:
-      reader = csv.DictReader(f)
-      for row in reader:
-        print(row)
-    
+        reader = csv.DictReader(f)
+        for row in reader:
+            print(row)
+
     with open("./sold.csv", "a", newline="") as f:
         writer = csv.writer(f)
         writer.writerow(['schrijf', 'dit', 'naar', 'file'])
@@ -38,7 +38,9 @@ def buy_product():
     # return 'OK'
     pass
 
-## Function is redundanct ##
+# Function is redundanct ##
+
+
 def print_report(file_content):
     '''
     Get report as seen in assignment.
@@ -67,12 +69,12 @@ def print_report(file_content):
         row_seperator += (item + 2) * "-" + "+"
     # Walk through each row to print out the information it contains
     row_number = 0
-    for row in file_content: 
-        # Assuming first row contains headers. After header want a simulation of
-        #  a double line
+    for row in file_content:
+        # Assuming first row contains headers. After header want a simulation
+        # of a double line
         if row_number == 1:
-            print(row_seperator.replace("-","="))
-        else:        
+            print(row_seperator.replace("-", "="))
+        else:
             print(row_seperator)
         line = "|"
         i = 0
@@ -83,9 +85,6 @@ def print_report(file_content):
         row_number += 1
     print(row_seperator)
 
-if __name__ == '__main__':
-    #main()
-    print_report(read_file("bought.csv"))
-    print_report(read_file("sold.csv"))
-    argparse
 
+if __name__ == '__main__':
+    argparse

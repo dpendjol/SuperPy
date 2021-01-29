@@ -1,11 +1,7 @@
 from datetime import date, timedelta
 
 
-def main():
-    pass
-
-
-def is_valid_date(input_date: str) -> bool:
+def is_valid_date(input_date: str):
     '''
     Check if the inputed date is of the proper format
     We expect a format by yyyy-mm-dd
@@ -14,9 +10,7 @@ def is_valid_date(input_date: str) -> bool:
     datum -- input the datum string
 
     Returns:
-    Tuple -- [0] bool
-             [1] When true datetime object
-             [1] When false errormessage
+    datetime.date -- of the input date
     '''
     try:
         date_format = date.fromisoformat(input_date)
@@ -32,7 +26,14 @@ def is_valid_date(input_date: str) -> bool:
 
 
 def get_dates_month(mydate: str):
-    '''get first and last day of month'''
+    '''get first and last day of month
+
+    Arguments:
+    mydate -- string of date in format yyyy-mm-dd
+
+    Returns:
+    tuple -- consisting of datetime.date objects
+    '''
     year = int(mydate.split("-")[0])
     month = int(mydate.split("-")[1])
     max_days = (date(year, month + 1, 1) - date(year, month, 1)).days
@@ -93,7 +94,3 @@ def shift_date(file_name: str, num_days: int):
     shift = timedelta(days=num_days)
     new_date = curr_date + shift
     return new_date
-
-
-if __name__ == "__main__":
-    main()
