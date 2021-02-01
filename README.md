@@ -76,7 +76,7 @@ With the following command you, as supermarkt owner, can sell product to your cu
 
 Assume there is a customer that wants to buy 10 appels for 2 euro a piece. We can do that as follow:
 
-`python super.py sell --product-name apples --amount 10 --price 2`
+`> python super.py sell --product-name apples --amount 10 --price 2`
 
 Just as with the `buy` command you can leave out the amount. When you do that, the program will ask you if you want to sell all the apples in stock. Choose `y` and everthing wil be sold, choose `n` and the program will do nothing.
 
@@ -150,6 +150,41 @@ The output is simple yet effective:
 
 As with the revenue you can also get the `profit` of yesterday, a specific date of a whole month.
 
+#### **Expired**
+If we want to know which product expired and what the loss is because we didn't sell the products we can use the following command
+
+`> python super.py report expired --now`
+
+The output is a table in which you can see which product expired, how many items per product and what the loss is.
+
+```
+┌──────────────┬────────────────────┬──────────────┬────────────┐
+│ Product Name │ Number of products │ Loss in euro │ Expired on │
+├──────────────┼────────────────────┼──────────────┼────────────┤
+│ wine         │                679 │       339.50 │ 2021-01-02 │
+├──────────────┼────────────────────┼──────────────┼────────────┤
+│              │                    │       339.50 │            │
+└──────────────┴────────────────────┴──────────────┴────────────┘
+```
+
+In the above example we didn't sell enough wine, so we have a loss of 339.50 euro.
+
+We can also see which products go bad in de comming seven day's with the command:
+
+`> python super.py report expired --nextweek`
+
+The result looks the same, but now we can see which products are going bad in de comming week.
+
+```
+┌──────────────┬────────────────────┬──────────────┬────────────┐
+│ Product Name │ Number of products │ Loss in euro │ Expired on │
+├──────────────┼────────────────────┼──────────────┼────────────┤
+│ wine         │               1383 │       691.50 │ 2021-02-02 │
+│ apples       │                200 │       160.00 │ 2021-02-01 │
+├──────────────┼────────────────────┼──────────────┼────────────┤
+│              │                    │       851.50 │            │
+└──────────────┴────────────────────┴──────────────┴────────────┘
+```
 ---
 ### In the future
 ---
