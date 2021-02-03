@@ -63,9 +63,11 @@ With the following command you, as supermarkt owner, buy products for your super
 
 Lets buy 15 apples for 50 cents a piece. The apples expiration dates is 22th of January 2021.
 
-`> python super.py buy --product-name apples --price 0.5 --expiration_date 2021-01-22`
+`> python super.py buy --product-name apples --price 0.5 --expiration-date 2021-01-22`
 
 If you **do not pass** a `--amount [AMOUNT]` the system wil **buy** only **one** item. If you want to buy more, just pass in the argument.
+
+If you pass a expiration-date in the past, then **the product will not be bought** since it allready expired.
 
 ---
 ### Selling a product
@@ -185,6 +187,23 @@ The result looks the same, but now we can see which products are going bad in de
 │              │                    │       851.50 │            │
 └──────────────┴────────────────────┴──────────────┴────────────┘
 ```
+---
+### Modifying date
+---
+#### **Advancing time**
+For testing purposes we can advance the date. We do that with the following command:
+
+`> usage: super.py [-h] [--advance-time ADVANCE_TIME]`
+
+ADVANCE_TIME is in day's, so if we want to advance the time for 2 day's we can use the next command:
+
+`> python super.py --advance-time 2`
+
+If we want to reset the date to the system date we can pass any negative value. For example:
+
+`> python super.py --advance-time -1`
+
+
 ---
 ### In the future
 ---

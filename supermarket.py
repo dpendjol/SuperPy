@@ -1,7 +1,7 @@
 
 import csv
 from datetime import date, timedelta
-from dates import get_current_date, get_dates_month, is_valid_date
+from dates import get_current_date, get_dates_month
 from rich.table import Table
 from rich.console import Console
 from os import path, getcwd
@@ -10,7 +10,8 @@ from file_check import check_files
 
 class Supermarket:
     '''Create a instance of a supermarket
-    Provide 2 files, one for bought products, one for sold products
+    Provide 3 files, one for bought products, one for sold products,
+    one for a date file
     '''
 
     def __init__(self):
@@ -25,9 +26,10 @@ class Supermarket:
         check_files(working_directory, data_folder, data=date_file,
                     sold=sold_file, bought=bought_file)
 
-        self._CURR_date = get_current_date(
+        self.current_date = get_current_date(
             path.join(data_folder, date_file)
         )
+
         self.bought_file = path.join(data_folder, bought_file)
         self.sold_file = path.join(data_folder, sold_file)
         self.date_file = path.join(data_folder, date_file)
@@ -35,7 +37,7 @@ class Supermarket:
         self.bought = self.read_file(self.bought_file)
         self.sold = self.read_file(self.sold_file)
 
-    def read_file(self, file_name) -> list:
+    def read_file(self, file_name):
         '''Reads the csv file and exports its in a dictionary.
 
         Arguments:
@@ -69,12 +71,47 @@ class Supermarket:
                         'selling_count': int(line['selling_count']),
                         'selling_price': float(line['selling_price']),
                         'selling_date': date.fromisoformat(
-                            line['selling_date'])
+                                            line['selling_date'])
                     }
 
             return output
 
-    def get_report_inventory(self, asked_date):
+    def get_inventory(self, first_day=date(1970, 1, 1),
+                      last_day=date(2500, 1, 1)):
+        '''Get the total inventory
+
+        Arguments:
+        first_day -- records from and including this date will be found
+        last_day -- record till and including this date will be found
+
+        Returns:
+        dict -- dictionary, key = product id, value = amount not sold yet
+        '''
+        inventory = {}
+        sold_products = self.sold.values()
+        sold_product_ids = []
+        sold_products_info = {}
+
+        for product in sold_products:
+            if first_day <= product['selling_date'] <= last_day:
+                sold_product_ids.append(product['product_id'])
+                try:
+                    sold_products_info[product['product_id']] = \
+                        sold_products_info[product['product_id']] \
+                        + product['selling_count']
+                except KeyError:  # when product is not yet in sold_products
+                    sold_products_info[product['product_id']] = \
+                        product['selling_count']
+
+        for product_id, product_specs in self.bought.items():
+            if product_id in sold_product_ids:
+                inventory[product_id] = product_specs['purchase_count'] \
+                    - sold_products_info[product_id]
+            else:
+                inventory[product_id] = product_specs['purchase_count']
+        return inventory
+
+    def print_inventory_table(self, asked_date):
         '''Display a table which contains every inventory item
 
         Arguments:
@@ -87,22 +124,24 @@ class Supermarket:
         rich package -- install trough pip install rich
             Needs rich.table and rich.console
         '''
-        table = Table(show_header=True, title='Inventory report')
+        table = Table(show_header=True, header_style="bold green",
+                      title='Inventory report', title_style="bold blue",
+                      title_justify="left")
         table.add_column('Product Name')
         table.add_column('Amount')
         table.add_column('Bought for')
         table.add_column('Expire on')
 
-        inventory = self.get_inventory(asked_date)
+        inventory = self.get_inventory(last_day=asked_date)
 
-        for key, value in inventory.items():
-            if not value == 0 and \
-                   asked_date < self.bought[key]['expiration_date']:
+        for product_id, amount in inventory.items():
+            if not amount == 0 and \
+                   asked_date < self.bought[product_id]['expiration_date']:
 
-                # Only add roy if the key exists. Work-a-round for when we
+                # Only add row if the key exists. Work-a-round for when we
                 # need a inventory from the past
                 try:
-                    product = self.bought[key]
+                    product = self.bought[product_id]
                     try:
                         check_date = product['purchase_date']
                     except KeyError:
@@ -110,11 +149,11 @@ class Supermarket:
                     if check_date <= asked_date:
                         table.add_row(
                             product['product_name'],
-                            str(value),
+                            str(amount),
                             str(product['purchase_price']),
                             date.isoformat(product['expiration_date'])
                         )
-                except KeyError:  # if pro
+                except KeyError:
                     pass
 
         myconsole = Console()
@@ -122,40 +161,7 @@ class Supermarket:
 
         return None
 
-    def get_inventory(self, asked_date=date(2200, 1, 1)):
-        '''Get the total inventory
-
-        Arguments:
-        None
-
-        Returns:
-        dict -- dictionary, key = product id, value = amount not sold yet
-        '''
-        inventory = {}
-        sold_products = self.sold.values()
-        sold_product_ids = []
-        sold_products_info = {}
-
-        for item in sold_products:
-            if item['selling_date'] <= asked_date:
-                sold_product_ids.append(item['product_id'])
-                try:
-                    sold_products_info[item['product_id']] = \
-                        sold_products_info[item['product_id']] \
-                        + item['selling_count']
-                except KeyError:  # when product is not yet in sold_products
-                    sold_products_info[item['product_id']] = \
-                        item['selling_count']
-
-        for key, value in self.bought.items():
-            if key in sold_product_ids:
-                inventory[key] = value['purchase_count'] \
-                    - sold_products_info[key]
-            else:
-                inventory[key] = value['purchase_count']
-        return inventory
-
-    def get_expired_items(self, asked_date: str, inventory):
+    def get_expired_items(self, asked_date, inventory, to_expire):
         '''Get the experied items
 
         Arguments:
@@ -166,9 +172,14 @@ class Supermarket:
         dict -- {product_id: amount_that_expired}
 
         '''
-        asked_date = is_valid_date(asked_date)
-        product_expired = filter(lambda item: item[1]['expiration_date'] <
-                        asked_date, self.bought.items())
+        if to_expire:
+            start_date = self.current_date
+        else:
+            start_date = date(1970, 1, 1)
+        product_expired = filter(lambda item: start_date
+                                 <= item[1]['expiration_date']
+                                 <= asked_date, self.bought.items()
+                                 )
         product_expired = dict(product_expired)
         output = {}
         for k, v in inventory.items():
@@ -176,14 +187,19 @@ class Supermarket:
                 output[k] = v
 
         return output
-    
+
     def get_expired_costs(self, dict_expired_items):
+        '''Get the costs of the items that where expired
+
+        Arguments:
+        dict_expired_items -- a dictionary of the expired items
+        '''
         total_costs = 0
-        for k, v in dict_expired_items.items():
-            total_costs += (self.bought[k]['purchase_price'] * v)
+        for product_id, amount in dict_expired_items.items():
+            total_costs += (self.bought[product_id]['purchase_price'] * amount)
         return total_costs
 
-    def print_expired_items(self, dict_expired_items):
+    def print_expired_table(self, dict_expired_items):
         '''Print a table which list a overview of all expired items
 
         Arguments:
@@ -197,7 +213,8 @@ class Supermarket:
                       title_justify="left")
         table.add_column('Product Name')
         table.add_column('Number of products', justify="right")
-        table.add_column('Loss in euro', str(format(total_costs, ".2f")), justify="right")
+        table.add_column('Loss in euro', str(format(total_costs, ".2f")),
+                         justify="right")
         table.add_column("Expired on", justify="right")
 
         for k, v in dict_expired_items.items():
@@ -209,19 +226,26 @@ class Supermarket:
         myconsole = Console()
         myconsole.print(table)
 
-    '''
-    def get_sold_product(self, asked_date):
-        sold_products = map(lambda product: product[1]['product_id'] )
-    '''
-    
-    def _get_sold_products_by_name(self, first_day=date(1970, 1, 1), 
+    def _get_sold_products_by_name(self, first_day=date(1970, 1, 1),
                                    last_day=date(2500, 1, 1)):
         '''
-        Get the sold product items sold between first_day till and including 
+        Get the sold product items sold between first_day till and including
         last_day
+
+        Arguments:
+        first_day -- the selling date from which data has to be taken into
+                     account. Date is included in the selection
+                     Default is 1st January 1970
+        last_day -- the selling date till which data has to be taken into
+                    account. Date is included in the selection
+                    Default is 1st January 2500
+
+        Return:
+        float -- total costs of all products that are expired in the given
+                 timeperiod
         '''
         output = {}
-        sold = filter(lambda x: first_day <= x[1]['selling_date'] <= last_day, 
+        sold = filter(lambda x: first_day <= x[1]['selling_date'] <= last_day,
                       self.sold.items())
         for product in dict(sold).values():
             id = product['product_id']
@@ -242,31 +266,31 @@ class Supermarket:
                                     'costs': product_costs
                                     }
         return output
-    
-    def print_sold_products(self):
+
+    def print_sold_products(self, asked_date=date(1970, 1, 1)):
         sold_items = self._get_sold_products_by_name()
         table = Table(show_header=True, header_style="green",
                       show_footer=True, footer_style="bold red on white",
                       title="Sold products", title_style="bold blue",
                       title_justify="left")
-        
+
         total_revenue = 0
         total_costs = 0
-        
+
         for item in sold_items.values():
             total_revenue += item['revenue']
             total_costs += item['costs']
-            
+
         table.add_column("Product name")
         table.add_column("Producs sold", justify="right")
         table.add_column("Revenue", f"{total_revenue}", justify="right")
         table.add_column("Costs", f"{total_costs}", justify="right")
-        
-        for k, v in sold_items.items():            
-            table.add_row(k,
-                          str(v['selling_count']),
-                          str(format(v['revenue'], ".2f")),
-                          str(format(v['costs'], ".2f"))
+
+        for product_name, product_specs in sold_items.items():
+            table.add_row(product_name,
+                          str(product_specs['selling_count']),
+                          str(format(product_specs['revenue'], ".2f")),
+                          str(format(product_specs['costs'], ".2f"))
                           )
         console = Console()
         console.print(table)
@@ -313,7 +337,7 @@ class Supermarket:
         return total_revenue
 
     def buy_product(self, product_name: str, price: float,
-                    amount: int, expiration_date) -> bool:
+                    amount: int, expiration_date):
         '''Buy a product
 
         Arguments:
@@ -328,7 +352,7 @@ class Supermarket:
         # Check if there is a product width the same price and experation date
 
         expiration_date = date.fromisoformat(expiration_date)
-
+        
         for key, value in self.bought.items():
             if value['product_name'] == product_name and \
                value['purchase_price'] == price and \
@@ -342,7 +366,7 @@ class Supermarket:
             'purchase_count': amount,
             'purchase_price': price,
             'expiration_date': expiration_date,
-            'purchase_date': Supermarket._CURR_date
+            'purchase_date': self.current_date
         }
 
         return True, 'Ok'
@@ -386,7 +410,7 @@ class Supermarket:
 
         total_amount = 0
         for product_id in product_ids:
-            if self.bought[product_id]['expiration_date'] > self._CURR_date:
+            if self.bought[product_id]['expiration_date'] > self.current_date:
                 total_amount += inventory[product_id]
 
         if total_amount == 0:
@@ -408,7 +432,7 @@ class Supermarket:
                     self.sold[str(new_id)] = {
                         'product_id': product_id,
                         'selling_count': inventory[product_id],
-                        'selling_date': Supermarket._CURR_date,
+                        'selling_date': self.current_date,
                         'selling_price': price
                         }
             return True, 'OK, product sold out now'
@@ -421,13 +445,13 @@ class Supermarket:
             return 'Not enough in stock'
 
         for product_id in product_ids:
-            if self.bought[product_id]['expiration_date'] > self._CURR_date:
+            if self.bought[product_id]['expiration_date'] > self.current_date:
                 if inventory[product_id] >= amount:
                     new_id = int(self.get_latest_id('sold')) + 1
                     self.sold[str(new_id)] = {
                         'product_id': product_id,
                         'selling_count': amount,
-                        'selling_date': Supermarket._CURR_date,
+                        'selling_date': Supermarket.current_date,
                         'selling_price': price
                         }
                     break
@@ -437,14 +461,13 @@ class Supermarket:
                     self.sold[str(new_id)] = {
                         'product_id': product_id,
                         'selling_count': sell_out_amount,
-                        'selling_date': Supermarket._CURR_date,
+                        'selling_date': Supermarket.current_date,
                         'selling_price': price
                         }
                     inventory[product_id] = 0
                     amount -= sell_out_amount
         return True, 'Ok'
 
-    # Did not need to be rewritten
     def get_latest_id(self, infile='sold'):
         '''Get the latest id
 
@@ -461,28 +484,6 @@ class Supermarket:
                 return max(self.bought.keys())
         except ValueError:
             return 0
-
-    # Not working correctly yet
-    def get_costs_expired(self, start_date, end_date):
-        '''Get the cost of the expired products
-
-        Arguments:
-        start_date -- datetime object with the start of the period
-        end_date -- datetime object with the end date of the period
-            When needed one specifiek date, start_date as to equal end_date
-
-        Returns:
-        int -- Integer containing the sum of the costs of expired products
-        '''
-        total_costs = 0
-
-        inventory = self.get_inventory()
-
-        for product in inventory.keys():
-            if start_date < self.bought[product]['expiration_date'] < end_date:
-                total_costs += (inventory[product]
-                                * self.bought[product]['purchase_price'])
-        return total_costs
 
     def write_file(self, file_name, data):
         '''Write data to the file, rewrite the whole file for now
@@ -527,7 +528,14 @@ class Supermarket:
         return
 
     def get_monthly_data(self, asked_date: str):
-        '''returns arrays of data for plotting graphs'''
+        '''returns arrays of data for plotting graphs
+
+        Arguments:
+        asked_date -- give a year and a month in the format yyyy-mm
+
+        Returns:
+        dict -- {days, costs, revenue, profit}
+        '''
         day, last_day = get_dates_month(asked_date)
         days = []
         costs = []
@@ -547,8 +555,43 @@ class Supermarket:
                 'profit': profits
                 }
 
-    def get_revenu_date_month(self, asked_date):
-        pass
+    def get_sold_items(self):
+        return self.sold
+
+    def get_bought_items(self):
+        return self.bought
+
+    def get_transactions_per_day(self, asked_date):
+        output = filter(lambda item: item[1]['selling_date'] ==
+                        asked_date, self.sold.items())
+        return dict(output)
+
+    def get_number_of_transactions_per_day(self, asked_date: str):
+        '''Gets the number of transactions per day'''
+        output = self.get_transactions_per_day(asked_date)
+        number_of_transactions = len(list(output))
+        return number_of_transactions
+
+    def get_average_transaction_per_day(self, asked_date):
+        output = self.get_transactions_per_day(asked_date)
+        total_revenue = 0
+        for item in output.values():
+            total_revenue += (item['selling_count'] * item['selling_price'])
+        try:
+            average = total_revenue / len(output)
+        except ZeroDivisionError:
+            average = 0
+        return average
+
+    def plot_average_transactions(self, month: str):
+        day, last_day = get_dates_month(month)
+        dates = []
+        average = []
+        while day < last_day:
+            dates.append(day.strftime("%Y-%m-%d"))
+            average.append(self.get_average_transaction_per_day(day))
+            day += timedelta(days=1)
+        return dates, average
 
 
 if __name__ == "__main__":

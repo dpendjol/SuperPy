@@ -1,36 +1,7 @@
 from matplotlib import pyplot as plt
-from supermarket import Supermarket
-
-''' Availible styles plot
-
-['Solarize_Light2',
-'_classic_test_patch',
-'bmh', 'classic',
-'dark_background',
-'fast',
-'fivethirtyeight',
-'ggplot', 'grayscale',
-'seaborn', 'seaborn-bright',
-'seaborn-colorblind', 'seaborn-dark',
-'seaborn-dark-palette',
-'seaborn-darkgrid',
-'seaborn-deep',
-'seaborn-muted',
-'seaborn-notebook',
-'seaborn-paper',
-'seaborn-pastel',
-'seaborn-poster',
-'seaborn-talk',
-'seaborn-ticks',
-'seaborn-white',
-'seaborn-whitegrid',
-'tableau-colorblind10']
-
-'''
-
-# choose to make use of another name voor args to make it more clear
-# what information it contains
-
+from rich.console import Console
+from dates import get_dates_month
+from datetime import timedelta
 
 def make_bar_chart(data_x, *data_y, **kwargs):
 
@@ -63,7 +34,7 @@ def make_bar_chart(data_x, *data_y, **kwargs):
     plt.show()
 
 
-def get_transactions_per_day(asked_date):
+def get_transactions_per_day(asked_date, sold_file):
     output = filter(lambda item: item[1]['selling_date'] ==
                     asked_date, sold_file.items())
     return dict(output)
@@ -90,21 +61,28 @@ def get_average_transaction_per_day(asked_date):
 
 def _get_cost_per_day(asked_date):
     output = filter(lambda item: item[1]['purchase_date'] ==
-                    asked_date, bought_file)
+                    asked_date)
     return dict(output)
 
+def plot_average_transactions(month:str):
+    day, last_day = get_dates_month(month)
+    transactions = []
+    while day < last_day:
+        transactions.append((day.strftime("%Y-%m-%d"), 
+                            get_average_transaction_per_day(day)))
+        day += timedelta(days=1)
+    print(transactions)
 
 myconsole = Console()
-output = get_number_of_transactions_per_day('2021-01-01')
-output = get_expired_items('2021-01-01')
-output = get_average_transaction_per_day('2021-01-01')
-myconsole.print(output, style='')
+# output = get_number_of_transactions_per_day('2021-01-01')
+# output = get_average_transaction_per_day('2021-01-01')
+# myconsole.print(output, style='')
 
 # bought_items = {k: v for k, v in sorted(self.bought.items(),
 #                key=lambda item: item[1]['expiration_date'])}
 
-
-mysuper = Supermarket("bought.csv", "sold.csv")
-data = mysuper.get_monthly_data("2020-01")
-make_bar_chart(data['days'], data['costs'], data['revenue'], data['profit'],
-               xlabel="xlabel", ylabel="ylabel", title="title")
+#plot_average_transactions("2021-01")
+# mysuper = Supermarket("bought.csv", "sold.csv")
+# data = mysuper.get_monthly_data("2020-01")
+# make_bar_chart(data['days'], data['costs'], data['revenue'], data['profit'],
+#                xlabel="xlabel", ylabel="ylabel", title="title")
