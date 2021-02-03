@@ -583,8 +583,10 @@ class Supermarket:
             average = 0
         return average
 
-    def plot_average_transactions(self, month: str):
-        day, last_day = get_dates_month(month)
+    def plot_average_transactions(self, input_date=None):
+        day, last_day = get_dates_month(input_date)
+        year = day.year
+        print(year)
         dates = []
         average = []
         while day < last_day:

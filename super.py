@@ -135,8 +135,8 @@ if args.advance_time:
         shifted = shift_date(mysuper.date_file, args.advance_time)
         set_date(mysuper.date_file, shifted)
 
-if args.command == "report" and args.subcommand = "transactions":
+if args.command == "transaction" and args.average_amount:
     '''Plots average transaction revenue per day'''
-    dates, average = mysuper.plot_average_transactions('2021-02')
+    dates, average = mysuper.plot_average_transactions()
     make_bar_chart(dates, average, xlabel="date", ylabel="Average (EUR)",
                    title="Average transaction")

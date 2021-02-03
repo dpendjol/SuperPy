@@ -177,6 +177,12 @@ We can also see which products go bad in de comming seven day's with the command
 
 The result looks the same, but now we can see which products are going bad in de comming week.
 
+#### **Transactions**
+
+Document --all
+Document --current-month
+document --current_year
+
 ```
 ┌──────────────┬────────────────────┬──────────────┬────────────┐
 │ Product Name │ Number of products │ Loss in euro │ Expired on │
@@ -202,6 +208,9 @@ ADVANCE_TIME is in day's, so if we want to advance the time for 2 day's we can u
 If we want to reset the date to the system date we can pass any negative value. For example:
 
 `> python super.py --advance-time -1`
+
+
+###
 
 
 ---
