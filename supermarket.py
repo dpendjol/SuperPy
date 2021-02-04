@@ -583,10 +583,16 @@ class Supermarket:
             average = 0
         return average
 
-    def plot_average_transactions(self, input_date=None):
-        day, last_day = get_dates_month(input_date)
-        year = day.year
-        print(year)
+    def plot_average_transactions(self, selection=None):
+        if selection == None:
+            day = date(2021, 1, 1) # choose 2020-01-01 because i except no sells before this date
+            last_day = self.current_date + timedelta(days=1)
+        elif selection == "month":
+            day, last_day = get_dates_month(self.current_date.strftime("%Y-%m"))
+        elif selection == "year":
+            day = date(self.current_date.year, 1, 1)
+            last_day = date(self.current_date.year, 12, 31)
+        print("IMPORTANT", day, last_day)
         dates = []
         average = []
         while day < last_day:

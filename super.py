@@ -137,6 +137,11 @@ if args.advance_time:
 
 if args.command == "transaction" and args.average_amount:
     '''Plots average transaction revenue per day'''
-    dates, average = mysuper.plot_average_transactions()
+    if args.all:
+        dates, average = mysuper.plot_average_transactions()
+    if args.current_month:
+        dates, average = mysuper.plot_average_transactions(selection="month")
+    if args.current_year:
+        dates, average = mysuper.plot_average_transactions(selection="year")
     make_bar_chart(dates, average, xlabel="date", ylabel="Average (EUR)",
                    title="Average transaction")

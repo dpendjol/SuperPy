@@ -179,6 +179,7 @@ The result looks the same, but now we can see which products are going bad in de
 
 #### **Transactions**
 
+Document --average-amount
 Document --all
 Document --current-month
 document --current_year
