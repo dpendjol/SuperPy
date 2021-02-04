@@ -72,7 +72,7 @@ def get_args():
                                  help="get all the transactions")
     selection_group.add_argument("--current-month", action="store_true",
                                  help="only get transactions for current month")
-    selection_group.add_argument("--current_year", action="store_true",
+    selection_group.add_argument("--current-year", action="store_true",
                                  help="only get transactions for current year")
 
 

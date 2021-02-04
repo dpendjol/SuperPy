@@ -145,3 +145,13 @@ if args.command == "transaction" and args.average_amount:
         dates, average = mysuper.plot_average_transactions(selection="year")
     make_bar_chart(dates, average, xlabel="date", ylabel="Average (EUR)",
                    title="Average transaction")
+
+if args.command == "transaction" and args.number_of_transactions:
+    if args.all:
+        dates, average = mysuper.plot_number_of_transactions()
+    if args.current_month:
+        dates, average = mysuper.plot_number_of_transactions(selection="month")
+    if args.current_year:
+        dates, average = mysuper.plot_number_of_transactions(selection="year")
+    make_bar_chart(dates, average, xlabel="date", ylabel="Average (EUR)",
+                   title="Average transaction")

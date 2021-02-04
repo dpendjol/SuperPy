@@ -352,7 +352,7 @@ class Supermarket:
         # Check if there is a product width the same price and experation date
 
         expiration_date = date.fromisoformat(expiration_date)
-        
+
         for key, value in self.bought.items():
             if value['product_name'] == product_name and \
                value['purchase_price'] == price and \
@@ -584,8 +584,9 @@ class Supermarket:
         return average
 
     def plot_average_transactions(self, selection=None):
-        if selection == None:
-            day = date(2021, 1, 1) # choose 2020-01-01 because i except no sells before this date
+        if selection is None:
+            # choose 2020-01-01 because i except no sells before this date
+            day = date(2021, 1, 1)
             last_day = self.current_date + timedelta(days=1)
         elif selection == "month":
             day, last_day = get_dates_month(self.current_date.strftime("%Y-%m"))
@@ -600,6 +601,29 @@ class Supermarket:
             average.append(self.get_average_transaction_per_day(day))
             day += timedelta(days=1)
         return dates, average
+
+    def plot_number_of_transactions(self, selection=None):
+        if selection is None:
+            # choose 2020-01-01 because i except no sells before this date
+            day = date(2021, 1, 1)
+            last_day = self.current_date + timedelta(days=1)
+        elif selection == "month":
+            day, last_day = get_dates_month(self.current_date.strftime("%Y-%m"))
+        elif selection == "year":
+            day = date(self.current_date.year, 1, 1)
+            last_day = date(self.current_date.year, 12, 31)
+        print("IMPORTANT", day, last_day)
+        dates = []
+        average = []
+        while day < last_day:
+            dates.append(day.strftime("%Y-%m-%d"))
+            average.append(self.get_number_of_transactions_per_day(day))
+            day += timedelta(days=1)
+        return dates, average
+
+
+
+
 
 
 if __name__ == "__main__":

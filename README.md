@@ -182,7 +182,13 @@ The result looks the same, but now we can see which products are going bad in de
 Document --average-amount
 Document --all
 Document --current-month
-document --current_year
+Document --current_year
+--> can be documented == working
+
+Document --number-of-transactions
+Document --all
+Document --current-month
+Document --current_year
 
 ```
 ┌──────────────┬────────────────────┬──────────────┬────────────┐
