@@ -1,6 +1,6 @@
 # Welcome to SuperPy
 
-SuperPy is a command line program to keep track of tranactions and inventory of a fictional supermarket.
+SuperPy is a command line program to keep track of transactions and inventory of a fictional supermarket.
 SuperPy comes with some nifty features to help everthing get along nicely
 
 * * *
