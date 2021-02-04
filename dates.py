@@ -36,6 +36,10 @@ def get_dates_month(mydate: str):
     '''
     year = int(mydate.split("-")[0])
     month = int(mydate.split("-")[1])
+    month = month + 1
+    if month > 12:
+        year = year + 1
+        month = 1
     max_days = (date(year, month + 1, 1) - date(year, month, 1)).days
     first_day = is_valid_date(mydate + "-01")
     last_day = is_valid_date(mydate + "-" + str(max_days))

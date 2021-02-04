@@ -15,9 +15,10 @@ def make_bar_chart(data_x, *data_y, **kwargs):
 
     '''
     for data in data_y:
-        plt.plot(data_x, data, label="blablabla")
+        plt.plot(data_x, data)
     number_of_items = len(data_x)
-    number_of_ticks = round(number_of_items / 25)
+    to_calculate_ticks = round(number_of_items / 25)
+    number_of_ticks = to_calculate_ticks if to_calculate_ticks > 0 else 1
     
     i = 0
     labels = []
@@ -32,7 +33,6 @@ def make_bar_chart(data_x, *data_y, **kwargs):
     plt.xlabel(kwargs['xlabel'])
     plt.ylabel(kwargs['ylabel'])
     plt.title(kwargs['title'])
-    plt.legend()
     plt.show()
 
 

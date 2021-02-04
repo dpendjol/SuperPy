@@ -74,6 +74,10 @@ def get_args():
                                  help="only get transactions for current month")
     selection_group.add_argument("--current-year", action="store_true",
                                  help="only get transactions for current year")
+    selection_group.add_argument("--previous-month", action="store_true",
+                                 help="only get transactions for previous month")
+    selection_group.add_argument("--previous-year", action="store_true",
+                                 help="only get transactions for previous year")
 
 
     args = parser.parse_args()

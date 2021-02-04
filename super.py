@@ -1,7 +1,8 @@
 from supermarket import Supermarket
+import sys
 from cli import get_args
 from rich.console import Console
-from datetime import timedelta
+from datetime import timedelta, date
 from dates import get_current_date, shift_date, is_valid_date, set_date, \
                   get_dates_month
 from graph import make_bar_chart
@@ -135,23 +136,47 @@ if args.advance_time:
         shifted = shift_date(mysuper.date_file, args.advance_time)
         set_date(mysuper.date_file, shifted)
 
+if args.all:
+    day = date(2021, 1, 1)
+    last_day = mysuper.current_date + timedelta(days=1)
+if args.current_month:
+    day, last_day = get_dates_month(mysuper.current_date.strftime("%Y-%m"))
+if args.current_year:
+    day = date(mysuper.current_date.year, 1, 1)
+    last_day = date(mysuper.current_date.year, 12, 31)
+if args.previous_month:
+    curr_year = mysuper.current_date.year
+    curr_month = mysuper.current_date.month
+    prev_month = curr_month - 1
+    if prev_month < 1:
+        prev_month = 12
+        curr_year -= 1
+    prevdate = date(curr_year, prev_month, 1)
+    day, last_day = get_dates_month(prevdate.strftime("%Y-%m"))
+if args.previous_year:
+    prev_year = mysuper.current_date.year - 1
+    day = date(prev_year, 1, 1)
+    last_day = date(prev_year, 12, 31)
+
 if args.command == "transaction" and args.average_amount:
     '''Plots average transaction revenue per day'''
-    if args.all:
-        dates, average = mysuper.plot_average_transactions()
-    if args.current_month:
-        dates, average = mysuper.plot_average_transactions(selection="month")
-    if args.current_year:
-        dates, average = mysuper.plot_average_transactions(selection="year")
-    make_bar_chart(dates, average, xlabel="date", ylabel="Average (EUR)",
-                   title="Average transaction")
+    daystr = day.strftime("%B %d, %Y")
+    last_daystr = last_day.strftime("%B %d, %Y")
+    dates, average = mysuper.plot_average_transactions(day, last_day)
+    number_of_not_zero = [x for x in average if x > 0]
+    if len(number_of_not_zero) < 1:
+        myconsole.print("No data found", style=stl_error)
+        sys.exit()
+    make_bar_chart(dates, average, xlabel="Date", ylabel="Average (EUR)",
+                   title=f"Average amount spend per transaction per day  \n {daystr} - {last_daystr}")
 
 if args.command == "transaction" and args.number_of_transactions:
-    if args.all:
-        dates, average = mysuper.plot_number_of_transactions()
-    if args.current_month:
-        dates, average = mysuper.plot_number_of_transactions(selection="month")
-    if args.current_year:
-        dates, average = mysuper.plot_number_of_transactions(selection="year")
-    make_bar_chart(dates, average, xlabel="date", ylabel="Average (EUR)",
-                   title="Average transaction")
+    dates, average = mysuper.plot_number_of_transactions(day, last_day)
+    daystr = day.strftime("%B %d, %Y")
+    last_daystr = last_day.strftime("%B %d, %Y")
+    number_of_not_zero = [x for x in average if x > 0]
+    if len(number_of_not_zero) < 1:
+        myconsole.print("No data found", style=stl_error)
+        sys.exit()
+    make_bar_chart(dates, average, xlabel="date", ylabel="Transactions",
+                   title=f"Average number of transactions per day \n {daystr} - {last_daystr}")
