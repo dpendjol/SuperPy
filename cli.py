@@ -25,7 +25,8 @@ def get_args():
 # Everything that has to do with the report command
     report_parser = subparser.add_parser("report", help="report command")
     report_parser.add_argument("subcommand",
-                               choices=["inventory", "revenue", "profit"],
+                               choices=["inventory", "revenue", "profit",
+                                        "expired"],
                                help="Choose which report you want to see")
 # Choose to create a group, only one of the arguments can be used at one time
     time_group = report_parser.add_mutually_exclusive_group()
@@ -35,6 +36,9 @@ def get_args():
                             help="get data of yesterday")
     time_group.add_argument("--today", action="store_true",
                             help="get data of today")
+    time_group.add_argument("--nextweek", action="store_true",
+                            help="get the items that will expire in de coming\
+                            seven days")
     time_group.add_argument("--date", type=str,
                             help="get data of date provided in format yyyy-mm")
 # Everything that has to do with the sell command
@@ -55,9 +59,29 @@ def get_args():
                             help="provide expiration date as yyyy-mm-dd")
     buy_parser.add_argument("--amount", type=int,
                             help="how many items dit you bought")
+# Everthing that has to do with plot
+    transaction_parser = subparser.add_parser("transaction",
+                                              help="Plot transaction data per day")
+    
+    type_group = transaction_parser.add_mutually_exclusive_group(required=True)
+    type_group.add_argument("--average-amount", action="store_true")
+    type_group.add_argument("--number-of-transactions", action="store_true")
+    
+    selection_group = transaction_parser.add_mutually_exclusive_group(required=True)
+    selection_group.add_argument("--all", action="store_true",
+                                 help="get all the transactions")
+    selection_group.add_argument("--current-month", action="store_true",
+                                 help="only get transactions for current month")
+    selection_group.add_argument("--current-year", action="store_true",
+                                 help="only get transactions for current year")
+    selection_group.add_argument("--previous-month", action="store_true",
+                                 help="only get transactions for previous month")
+    selection_group.add_argument("--previous-year", action="store_true",
+                                 help="only get transactions for previous year")
+
 
     args = parser.parse_args()
-
+    print(args)
     return args
 
 

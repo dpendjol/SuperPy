@@ -1,45 +1,48 @@
 from supermarket import Supermarket
+import sys
 from cli import get_args
 from rich.console import Console
 from datetime import timedelta, date
 from dates import get_current_date, shift_date, is_valid_date, set_date, \
                   get_dates_month
+from graph import make_bar_chart
 
 mysuper = Supermarket()
 myconsole = Console()
 
-inventory = mysuper.get_inventory(date(2021, 1, 1))
-expired_items = mysuper.get_expired_items('2021-01-01', inventory)
-mysuper.print_expired_items(expired_items)
-
-mysuper.print_sold_products()
+stl_error = "bold red on white"
+stl_reg = "bold green"
 
 args = get_args()
 
+# Documented
 if args.command == 'buy':
     try:
         mydate = is_valid_date(args.expiration_date)
-        if mydate <= mysuper._CURR_date:
-            print('ERROR: product is already expired')
+        if mydate <= mysuper.current_date:
+            myconsole.print('ERROR: product is already expired',
+                            style=stl_error)
             exit()
     except ValueError as e:
-        print(e)
+        myconsole.print(e, style=stl_error)
     else:
         amount = args.amount if args.amount else 1
         mysuper.buy_product(args.product_name, args.price, amount,
                             args.expiration_date)
         mysuper.write_file(mysuper.bought_file, mysuper.bought)
-        print('OK')
+        myconsole.print('OK', style=stl_reg)
 
+# Documented
 if args.command == 'sell':
     try:
         mysuper.sell_product(args.product_name, args.amount, args.price)
     except Exception as e:
-        print(e)
+        myconsole.print(e, style=stl_error)
     else:
         mysuper.write_file(mysuper.sold_file, mysuper.sold)
-        print('OK')
+        myconsole.print('OK', style=stl_reg)
 
+# Documented
 if args.command == 'report' and args.subcommand == 'inventory':
     mydate = get_current_date(mysuper.date_file)
     if args.now:
@@ -48,41 +51,54 @@ if args.command == 'report' and args.subcommand == 'inventory':
         mydate += timedelta(days=-1)
     if args.date is not None:
         mydate = is_valid_date(args.date)
-    mysuper.get_report_inventory(mydate)
+    mysuper.print_inventory_table(mydate)
 
+# Documented
 if args.command == 'report' and args.subcommand == 'revenue':
     report = 0
     if args.today:
         curr_date = get_current_date(mysuper.date_file)
         report = mysuper.get_revenue_sold(curr_date, curr_date)
-        print("Today's revenue so far: ", report)
+        myconsole.print(f"Today's revenue so far: {report}", style=stl_reg)
     if args.yesterday:
-        asked_date = shift_date(mysuper.date_filedate_file, -1)
+        asked_date = shift_date(mysuper.date_file, -1)
         report = mysuper.get_revenue_sold(asked_date, asked_date)
-        print("Yesterday's revenue: ", report)
+        myconsole.print(f"Yesterday's revenue: {report}", style=stl_reg)
     if args.date:
         if len(args.date) == 7:
             first_day, last_day = get_dates_month(args.date)
             report = mysuper.get_revenue_sold(first_day, last_day)
-            print('Revenue from ' + first_day.strftime("%b %Y") + ":", report)
+            myconsole.print(f"Revenue from {first_day.strftime('%b %Y')}: \
+                {report}", style=stl_reg)
         else:
             try:
                 message = is_valid_date(args.date)
             except ValueError as e:
-                print(e)
+                myconsole.print(e, style="bold red on white")
             else:
                 new_date = message
                 report = mysuper.get_revenue_sold(new_date, new_date)
-                print('Revenue from ' + new_date.strftime("%d %b %Y") + ":",
-                      report)
+                myconsole.print(f"Revenue from {new_date.strftime('%d %b %Y')}: {report}",
+                                style=stl_reg)
 
+# Documented
 if args.command == "report" and args.subcommand == "expired":
-    inventory = mysuper.get_inventory(date(2021, 1, 1))
-    expired_items = mysuper.get_expired_items('2021-01-01', inventory)
-    mysuper.print_expired_items(expired_items)
-    if args.mode == "table":
-        pass
-    
+    if args.now:
+        mydate = get_current_date(mysuper.date_file)
+        inventory = mysuper.get_inventory(mydate)
+        expired_items = mysuper.get_expired_items(mydate, inventory,
+                                                  to_expire=False)
+    if args.nextweek:
+        mydate = mydate + timedelta(days=7)
+        inventory = mysuper.get_inventory(mydate)
+        expired_items = mysuper.get_expired_items(mydate, inventory,
+                                                  to_expire=True)
+    try:
+        mysuper.print_expired_table(expired_items)
+    except NameError:
+        myconsole.print("Please use a --now or the --nextweek flag, see --help", style=stl_error)
+
+# Documented
 if args.command == "report" and args.subcommand == "profit":
     curr_date = get_current_date(mysuper.date_file)
     first_day = None
@@ -101,16 +117,66 @@ if args.command == "report" and args.subcommand == "profit":
             last_day = first_day
         cost_sold = mysuper.get_costs_sold(first_day, last_day)
     except NameError:
-        print("Please use the --yesterday/--yesterday/--date \
-              [yyyy-mm-dd] arguments")
+        myconsole.print("Please use the --yesterday/--yesterday/--date \
+              [yyyy-mm-dd] arguments", style=stl_error)
     else:
         # Function get_costs_expired not working correctly yet
         # cost_expired = mysuper.get_costs_expired(date_one, date_one)
         cost_expired = 0
         revenue = mysuper.get_revenue_sold(first_day, last_day)
         # print(revenue, cost_expired, cost_sold)
-        print(revenue - cost_expired - cost_sold)
+        myconsole.print(revenue - cost_expired - cost_sold, style=stl_reg)
 
 if args.advance_time:
-    shifted = shift_date(mysuper.date_file, args.advance_time)
-    set_date(mysuper.date_file, shifted)
+    if args.advance_time >= 0:
+        shifted = shift_date(mysuper.date_file, args.advance_time)
+        set_date(mysuper.date_file, shifted)
+
+    if args.advance_time < 0:
+        shifted = shift_date(mysuper.date_file, args.advance_time)
+        set_date(mysuper.date_file, shifted)
+
+if args.all:
+    day = date(2021, 1, 1)
+    last_day = mysuper.current_date + timedelta(days=1)
+if args.current_month:
+    day, last_day = get_dates_month(mysuper.current_date.strftime("%Y-%m"))
+if args.current_year:
+    day = date(mysuper.current_date.year, 1, 1)
+    last_day = date(mysuper.current_date.year, 12, 31)
+if args.previous_month:
+    curr_year = mysuper.current_date.year
+    curr_month = mysuper.current_date.month
+    prev_month = curr_month - 1
+    if prev_month < 1:
+        prev_month = 12
+        curr_year -= 1
+    prevdate = date(curr_year, prev_month, 1)
+    day, last_day = get_dates_month(prevdate.strftime("%Y-%m"))
+if args.previous_year:
+    prev_year = mysuper.current_date.year - 1
+    day = date(prev_year, 1, 1)
+    last_day = date(prev_year, 12, 31)
+
+if args.command == "transaction" and args.average_amount:
+    '''Plots average transaction revenue per day'''
+    daystr = day.strftime("%B %d, %Y")
+    last_daystr = last_day.strftime("%B %d, %Y")
+    dates, average = mysuper.plot_average_transactions(day, last_day)
+    number_of_not_zero = [x for x in average if x > 0]
+    if len(number_of_not_zero) < 1:
+        myconsole.print("No data found", style=stl_error)
+        sys.exit()
+    make_bar_chart(dates, average, xlabel="Date", ylabel="Average (EUR)",
+                   title=f"Average amount spend per transaction per day  \n {daystr} - {last_daystr}")
+
+if args.command == "transaction" and args.number_of_transactions:
+    dates, average = mysuper.plot_number_of_transactions(day, last_day)
+    daystr = day.strftime("%B %d, %Y")
+    last_daystr = last_day.strftime("%B %d, %Y")
+    number_of_not_zero = [x for x in average if x > 0]
+    if len(number_of_not_zero) < 1:
+        myconsole.print("No data found", style=stl_error)
+        sys.exit()
+    make_bar_chart(dates, average, xlabel="date", ylabel="Transactions",
+                   title=f"Average number of transactions per day \n {daystr} - {last_daystr}")
