@@ -62,23 +62,26 @@ def get_args():
 # Everthing that has to do with plot
     transaction_parser = subparser.add_parser("transaction",
                                               help="Plot transaction data per day")
-    
+
     type_group = transaction_parser.add_mutually_exclusive_group(required=True)
     type_group.add_argument("--average-amount", action="store_true")
     type_group.add_argument("--number-of-transactions", action="store_true")
-    
+
     selection_group = transaction_parser.add_mutually_exclusive_group(required=True)
     selection_group.add_argument("--all", action="store_true",
                                  help="get all the transactions")
-    selection_group.add_argument("--current-month", action="store_true",
+    selection_group.add_argument("--current-month",
+                                 action="store_true",
                                  help="only get transactions for current month")
-    selection_group.add_argument("--current-year", action="store_true",
+    selection_group.add_argument("--current-year",
+                                 action="store_true",
                                  help="only get transactions for current year")
-    selection_group.add_argument("--previous-month", action="store_true",
+    selection_group.add_argument("--previous-month",
+                                 action="store_true",
                                  help="only get transactions for previous month")
-    selection_group.add_argument("--previous-year", action="store_true",
+    selection_group.add_argument("--previous-year",
+                                 action="store_true",
                                  help="only get transactions for previous year")
-
 
     args = parser.parse_args()
     print(args)

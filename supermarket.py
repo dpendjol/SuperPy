@@ -604,9 +604,5 @@ class Supermarket:
         return dates, average
 
 
-
-
-
-
 if __name__ == "__main__":
     pass

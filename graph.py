@@ -1,7 +1,7 @@
 from matplotlib import pyplot as plt
-from rich.console import Console
 from dates import get_dates_month
 from datetime import timedelta, datetime
+
 
 def make_bar_chart(data_x, *data_y, **kwargs):
 
@@ -19,7 +19,7 @@ def make_bar_chart(data_x, *data_y, **kwargs):
     number_of_items = len(data_x)
     to_calculate_ticks = round(number_of_items / 25)
     number_of_ticks = to_calculate_ticks if to_calculate_ticks > 0 else 1
-    
+
     i = 0
     labels = []
     ticks = []
@@ -66,25 +66,16 @@ def _get_cost_per_day(asked_date):
                     asked_date)
     return dict(output)
 
-def plot_average_transactions(month:str):
+
+def plot_average_transactions(month: str):
     day, last_day = get_dates_month(month)
     transactions = []
     while day < last_day:
-        transactions.append((day.strftime("%Y-%m-%d"), 
+        transactions.append((day.strftime("%Y-%m-%d"),
                             get_average_transaction_per_day(day)))
         day += timedelta(days=1)
     print(transactions)
 
-myconsole = Console()
-# output = get_number_of_transactions_per_day('2021-01-01')
-# output = get_average_transaction_per_day('2021-01-01')
-# myconsole.print(output, style='')
 
-# bought_items = {k: v for k, v in sorted(self.bought.items(),
-#                key=lambda item: item[1]['expiration_date'])}
-
-#plot_average_transactions("2021-01")
-# mysuper = Supermarket("bought.csv", "sold.csv")
-# data = mysuper.get_monthly_data("2020-01")
-# make_bar_chart(data['days'], data['costs'], data['revenue'], data['profit'],
-#                xlabel="xlabel", ylabel="ylabel", title="title")
+if __name__ == "__main__":
+    pass

@@ -5,15 +5,19 @@ SuperPy comes with some nifty features to help everthing get along nicely
 
 * * *
 Table of contents
-- Getting started
-- Needed files and formats
-- Buying a product
-- Selling a product
-- Getting reports
-  - Inventory
-  - Revenue
-  - Profit
-- In the future
+- [Getting started](#getting-started)
+- [Needed files and formats](#needed-files-and-formats)
+- [Buying a product](#buying-a-product)
+- [Selling a product](#selling-a-product)
+- [Getting reports](#getting-reports)
+  - [Inventory](#inventory)
+  - [Revenue](#revenue)
+  - [Profit](#profit)
+  - [Expired](#expired)
+  - [Transactions](#transactions)
+- [Modifying date](#modifying-date)
+  - [Advancing time](#advancing-time)
+- [Thank you](#thank-you)
 
 * * *
 
@@ -177,19 +181,6 @@ We can also see which products go bad in de comming seven day's with the command
 
 The result looks the same, but now we can see which products are going bad in de comming week.
 
-#### **Transactions**
-
-Document --average-amount
-Document --all
-Document --current-month
-Document --current_year
---> can be documented == working
-
-Document --number-of-transactions
-Document --all
-Document --current-month
-Document --current_year
-
 ```
 ┌──────────────┬────────────────────┬──────────────┬────────────┐
 │ Product Name │ Number of products │ Loss in euro │ Expired on │
@@ -200,6 +191,48 @@ Document --current_year
 │              │                    │       851.50 │            │
 └──────────────┴────────────────────┴──────────────┴────────────┘
 ```
+
+#### **Transactions**
+
+We can also evaluate the transaction. As supermarkt manager you can plot data concerning the average-amount spend bij customers per day per transactions. And we can also plot the number of transactions per day given a certain period. Both will be explaind below
+
+```
+usage: super.py transaction [-h] (--average-amount | --number-of-transactions) (--all | --current-month | --current-year | --previous-month | --previous-year)
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --average-amount
+  --number-of-transactions
+  --all                 get all the transactions
+  --current-month       only get transactions for current month
+  --current-year        only get transactions for current year
+  --previous-month      only get transactions for previous month
+  --previous-year       only get transactions for previous year
+```
+
+So wen we want to know the average amount spend per transaction over the current month we can use the command:
+
+`> python super.py transaction --average-amount --current-month `
+
+The result wil be a graph as you can see below (depending on the data in your files off-course):
+
+![average spending](readme_img/average_amount_example_month.png)
+
+We can also do this for all the data in de current year bij using the flag `--current-year` instead of `--current-month`.  
+The `--all` flag ensures that all the sales in the datafile are taken into account wen creating the plot.  
+Finally we can use the `--previous-month` or the `--previous-year` flag if we want to see the data of that time period.
+When there is no data to display you will get a message in your terminal.
+
+Next to the spending amount we can see if it was busy. We can plot the number of transactions bij issueing the command:
+
+`> python super.py transaction --number-of-transactions --all`
+
+That wil result in the following plot.
+
+![Number of transactions](readme_img/number_of_transactions.png)
+
+The periods over which this command can display the data are the same as with the `--average-amount` flag.
+
 ---
 ### Modifying date
 ---
@@ -216,13 +249,8 @@ If we want to reset the date to the system date we can pass any negative value. 
 
 `> python super.py --advance-time -1`
 
-
-###
-
-
 ---
-### In the future
+### Thank you
 ---
+Thank you for reading the manual. If you came across bugs or if you have feature requests please let me know. This is my first command-line program so any feedback is welcome.
 
-A couple of things that we want to implement in the program in the future:
-- Creating graphical overviews of the sales and profit in a specific month

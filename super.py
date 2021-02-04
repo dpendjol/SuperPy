@@ -78,8 +78,8 @@ if args.command == 'report' and args.subcommand == 'revenue':
             else:
                 new_date = message
                 report = mysuper.get_revenue_sold(new_date, new_date)
-                myconsole.print(f"Revenue from {new_date.strftime('%d %b %Y')}: {report}",
-                                style=stl_reg)
+                myconsole.print(f"Revenue from \
+                    {new_date.strftime('%d %b %Y')}: {report}", style=stl_reg)
 
 # Documented
 if args.command == "report" and args.subcommand == "expired":
@@ -96,7 +96,8 @@ if args.command == "report" and args.subcommand == "expired":
     try:
         mysuper.print_expired_table(expired_items)
     except NameError:
-        myconsole.print("Please use a --now or the --nextweek flag, see --help", style=stl_error)
+        myconsole.print("Please use a --now or the --nextweek flag, see \
+                        --help", style=stl_error)
 
 # Documented
 if args.command == "report" and args.subcommand == "profit":
@@ -168,7 +169,8 @@ if args.command == "transaction" and args.average_amount:
         myconsole.print("No data found", style=stl_error)
         sys.exit()
     make_bar_chart(dates, average, xlabel="Date", ylabel="Average (EUR)",
-                   title=f"Average amount spend per transaction per day  \n {daystr} - {last_daystr}")
+                   title=f"Average amount spend per transaction per day  \n \
+                       {daystr} - {last_daystr}")
 
 if args.command == "transaction" and args.number_of_transactions:
     dates, average = mysuper.plot_number_of_transactions(day, last_day)
