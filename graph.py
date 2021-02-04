@@ -1,7 +1,7 @@
 from matplotlib import pyplot as plt
 from rich.console import Console
 from dates import get_dates_month
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 def make_bar_chart(data_x, *data_y, **kwargs):
 
@@ -15,18 +15,20 @@ def make_bar_chart(data_x, *data_y, **kwargs):
 
     '''
     for data in data_y:
-        print(data)
         plt.plot(data_x, data, label="blablabla")
-
+    number_of_items = len(data_x)
+    number_of_ticks = round(number_of_items / 25)
+    
     i = 0
     labels = []
+    ticks = []
     for item in data_x:
-        if i % 5 == 0:
-            labels.append(i+1)
-        else:
-            labels.append("")
+        if i % number_of_ticks == 0:
+            mydate = datetime.strptime(item, "%Y-%m-%d")
+            labels.append(mydate.strftime("%d-%m"))
+            ticks.append(item)
         i += 1
-    plt.xticks(ticks=data_x, labels=labels)
+    plt.xticks(ticks=ticks, labels=labels, fontsize=8, rotation=-90)
     plt.xlabel(kwargs['xlabel'])
     plt.ylabel(kwargs['ylabel'])
     plt.title(kwargs['title'])
