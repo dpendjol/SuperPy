@@ -15,7 +15,6 @@ def check_files(cwd, folder, **kwargs):
     Returns:
     None
     '''
-    print("checking files")
     full_path = path.join(cwd, folder)
     dir_exists = path.isdir(full_path)
     if not dir_exists:
@@ -38,18 +37,18 @@ def check_files(cwd, folder, **kwargs):
         boughtfile = path.join(full_path, bought_file)
         bought_file_exists = path.isfile(boughtfile)
         if not bought_file_exists:
-            with open(boughtfile, "w", newline="") as filehandle:
-                headers = ["id", "product_name", "purchase_count",
-                           "purchase_price", "expiration_date",
-                           "purchase_date"]
+            with open(boughtfile, 'w', newline='') as filehandle:
+                headers = ['id', 'product_name', 'purchase_count',
+                           'purchase_price', 'expiration_date',
+                           'purchase_date']
                 writer = DictWriter(filehandle, fieldnames=headers)
                 writer.writeheader()
         soldfile = path.join(full_path, sold_file)
         sold_file_exists = path.isfile(soldfile)
         if not sold_file_exists:
-            with open(soldfile, "w", newline='') as filehandle:
-                headers = ["id", "product_id", "selling_count", "selling_date",
-                           "selling_price"]
+            with open(soldfile, 'w', newline='') as filehandle:
+                headers = ['id', 'product_id', 'selling_count', 'selling_date',
+                           'selling_price']
                 writer = DictWriter(filehandle, headers)
                 writer.writeheader()
     return None

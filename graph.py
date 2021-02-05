@@ -13,6 +13,8 @@ def make_bar_chart(data_x, *data_y, **kwargs):
 
     Also possible to use arguments used in matplotlib
 
+    Return:
+    None
     '''
     for data in data_y:
         plt.plot(data_x, data)
@@ -35,8 +37,11 @@ def make_bar_chart(data_x, *data_y, **kwargs):
     plt.title(kwargs['title'])
     plt.show()
 
+    return None
 
-def get_transactions_per_day(asked_date, sold_file):
+
+def get_transactions_per_day(asked_date: str, sold_file):
+    '''Get the transactions per day'''
     output = filter(lambda item: item[1]['selling_date'] ==
                     asked_date, sold_file.items())
     return dict(output)
@@ -50,6 +55,7 @@ def get_number_of_transactions_per_day(asked_date: str):
 
 
 def get_average_transaction_per_day(asked_date):
+    '''Get the average amount spend per transactions per day '''
     output = get_transactions_per_day(asked_date)
     total_revenue = 0
     for item in output.values():
@@ -61,20 +67,15 @@ def get_average_transaction_per_day(asked_date):
     return average
 
 
-def _get_cost_per_day(asked_date):
-    output = filter(lambda item: item[1]['purchase_date'] ==
-                    asked_date)
-    return dict(output)
-
-
-def plot_average_transactions(month: str):
-    day, last_day = get_dates_month(month)
-    transactions = []
-    while day < last_day:
-        transactions.append((day.strftime("%Y-%m-%d"),
-                            get_average_transaction_per_day(day)))
-        day += timedelta(days=1)
-    print(transactions)
+# Redundant?
+# def plot_average_transactions(month: str):
+#     day, last_day = get_dates_month(month)
+#     transactions = []
+#     while day < last_day:
+#         transactions.append((day.strftime("%Y-%m-%d"),
+#                             get_average_transaction_per_day(day)))
+#         day += timedelta(days=1)
+#     print(transactions)
 
 
 if __name__ == "__main__":

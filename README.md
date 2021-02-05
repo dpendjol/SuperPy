@@ -14,6 +14,7 @@ Table of contents
   - [Revenue](#revenue)
   - [Profit](#profit)
   - [Expired](#expired)
+  - [Sold][#sold]
   - [Transactions](#transactions)
 - [Modifying date](#modifying-date)
   - [Advancing time](#advancing-time)
@@ -191,6 +192,35 @@ The result looks the same, but now we can see which products are going bad in de
 │              │                    │       851.50 │            │
 └──────────────┴────────────────────┴──────────────┴────────────┘
 ```
+
+### **Sold**
+
+If we want to know wat we products we sold at a particular day, then we can use the command:
+
+`usage: super.py report sold [--now | --yesterday | --today | --nextweek | --date DATE]`
+
+*sidenote: the `--now` and the `--today` flag give the same results*
+
+So we want to know what we sold on the following date 2021-02-05. We can do that with the command:
+
+`> python super.py report sold --date 2021-02-05`
+
+Below you can see the output of this command
+
+```
+Sold products                                    
+┏━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━┓
+┃ Product name ┃ Producs sold ┃ Revenue ┃ Costs ┃
+┡━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━┩
+│ orange       │            6 │   12.00 │  4.80 │
+│ appels       │            1 │    2.00 │  0.80 │
+│ wine         │            1 │    2.00 │  0.80 │
+├──────────────┼──────────────┼─────────┼───────┤
+│              │              │   16.00 │  6.40 │
+└──────────────┴──────────────┴─────────┴───────┘
+```
+
+As you can see we can also see the numbers of this
 
 #### **Transactions**
 

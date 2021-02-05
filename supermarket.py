@@ -14,13 +14,9 @@ class Supermarket:
     one for a date file
     '''
 
-    def __init__(self):
+    def __init__(self, data_folder, bought_file, sold_file, date_file):
 
         working_directory = getcwd()
-        data_folder = 'data'
-        bought_file = 'bought.csv'
-        sold_file = 'sold.csv'
-        date_file = 'date.txt'
 
         # Check if the nessesary files exist, if not, then create them
         check_files(working_directory, data_folder, data=date_file,
@@ -82,7 +78,9 @@ class Supermarket:
 
         Arguments:
         first_day -- records from and including this date will be found
+                     is a datetime object
         last_day -- record till and including this date will be found
+                    is a datetime object
 
         Returns:
         dict -- dictionary, key = product id, value = amount not sold yet
@@ -226,8 +224,8 @@ class Supermarket:
         myconsole = Console()
         myconsole.print(table)
 
-    def _get_sold_products_by_name(self, first_day=date(1970, 1, 1),
-                                   last_day=date(2500, 1, 1)):
+    def get_sold_products_by_name(self, first_day=date(1970, 1, 1),
+                                  last_day=date(2500, 1, 1)):
         '''
         Get the sold product items sold between first_day till and including
         last_day
@@ -267,11 +265,12 @@ class Supermarket:
                                     }
         return output
 
-    def print_sold_products(self, asked_date=date(1970, 1, 1)):
-        sold_items = self._get_sold_products_by_name()
+    def print_sold_products(self, day, first_day):
+        '''Print a table of products sold'''
+        sold_items = self.get_sold_products_by_name(day, first_day)
         table = Table(show_header=True, header_style="green",
                       show_footer=True, footer_style="bold red on white",
-                      title="Sold products", title_style="bold blue",
+                      title="Overview", title_style="bold blue",
                       title_justify="left")
 
         total_revenue = 0
@@ -280,17 +279,25 @@ class Supermarket:
         for item in sold_items.values():
             total_revenue += item['revenue']
             total_costs += item['costs']
+        
+        total_profit = total_revenue - total_costs
 
         table.add_column("Product name")
         table.add_column("Producs sold", justify="right")
-        table.add_column("Revenue", f"{total_revenue}", justify="right")
-        table.add_column("Costs", f"{total_costs}", justify="right")
+        table.add_column("Revenue", f"{format(total_revenue, '.2f')}",
+                         justify="right")
+        table.add_column("Costs", f"{format(total_costs, '.2f')}",
+                         justify="right")
+        table.add_column("Profit", f"{format(total_profit, '.2f')}",
+                         justify="right")
 
         for product_name, product_specs in sold_items.items():
             table.add_row(product_name,
                           str(product_specs['selling_count']),
                           str(format(product_specs['revenue'], ".2f")),
-                          str(format(product_specs['costs'], ".2f"))
+                          str(format(product_specs['costs'], ".2f")),
+                          str(format(product_specs['revenue']
+                                     - product_specs['costs'], ".2f"))
                           )
         console = Console()
         console.print(table)
@@ -584,7 +591,6 @@ class Supermarket:
         return average
 
     def plot_average_transactions(self, day, last_day):
-        print("IMPORTANT", day, last_day)
         dates = []
         average = []
         while day < last_day:
@@ -594,7 +600,6 @@ class Supermarket:
         return dates, average
 
     def plot_number_of_transactions(self, day, last_day):
-        print("IMPORTANT", day, last_day)
         dates = []
         average = []
         while day < last_day:
