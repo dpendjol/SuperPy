@@ -14,7 +14,7 @@ Table of contents
   - [Revenue](#revenue)
   - [Profit](#profit)
   - [Expired](#expired)
-  - [Sold][#sold]
+  - [Overview](#overview)
   - [Transactions](#transactions)
 - [Modifying date](#modifying-date)
   - [Advancing time](#advancing-time)
@@ -193,7 +193,7 @@ The result looks the same, but now we can see which products are going bad in de
 └──────────────┴────────────────────┴──────────────┴────────────┘
 ```
 
-### **Sold**
+### **Overview**
 
 If we want to know wat we products we sold at a particular day, then we can use the command:
 
@@ -208,19 +208,19 @@ So we want to know what we sold on the following date 2021-02-05. We can do that
 Below you can see the output of this command
 
 ```
-Sold products                                    
-┏━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━┓
-┃ Product name ┃ Producs sold ┃ Revenue ┃ Costs ┃
-┡━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━┩
-│ orange       │            6 │   12.00 │  4.80 │
-│ appels       │            1 │    2.00 │  0.80 │
-│ wine         │            1 │    2.00 │  0.80 │
-├──────────────┼──────────────┼─────────┼───────┤
-│              │              │   16.00 │  6.40 │
-└──────────────┴──────────────┴─────────┴───────┘
+Overview                                                  
+┏━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━┳━━━━━━━━┓
+┃ Product name ┃ Producs sold ┃ Revenue ┃ Costs ┃ Profit ┃
+┡━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━╇━━━━━━━━┩
+│ orange       │            6 │   12.00 │  4.80 │   7.20 │
+│ appels       │            1 │    2.00 │  0.80 │   1.20 │
+│ wine         │            1 │    2.00 │  0.80 │   1.20 │
+├──────────────┼──────────────┼─────────┼───────┼────────┤
+│              │              │   16.00 │  6.40 │   9.60 │
+└──────────────┴──────────────┴─────────┴───────┴────────┘
 ```
 
-As you can see we can also see the numbers of this
+As you can see, we get a overview in and we can see wat we sold, and what the revenue, costs and profit per product and totals for the requested day.
 
 #### **Transactions**
 

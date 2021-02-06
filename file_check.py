@@ -1,6 +1,5 @@
 from os import path, makedirs
 from csv import DictWriter
-from datetime import date
 
 
 def check_files(cwd, folder, **kwargs):

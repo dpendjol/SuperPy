@@ -1,5 +1,4 @@
 from matplotlib import pyplot as plt
-from dates import get_dates_month
 from datetime import timedelta, datetime
 
 

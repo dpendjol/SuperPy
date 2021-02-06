@@ -34,8 +34,10 @@ if args.command == "buy":
         myconsole.print(e, style=stl_error)
     else:
         amount = args.amount if args.amount else 1
+        expiriation_date = mydateobj.convert_str_to_datetime(args.expiration_date)
+        print(expiriation_date)
         mysuper.buy_product(args.product_name, args.price, amount,
-                            args.expiration_date)
+                            expiriation_date)
         mysuper.write_file(mysuper.bought_file, mysuper.bought)
         myconsole.print("OK", style=stl_reg)
 
@@ -69,7 +71,7 @@ if args.command == "report" and args.subcommand == "revenue":
         report = mysuper.get_revenue_sold(asked_date, asked_date)
         myconsole.print(f"Yesterday's revenue: {report}", style=stl_reg)
     if args.date:
-        first_day, last_day = mydate.get_range_month(args.date)
+        first_day, last_day = mydateobj.get_range_month(args.date)
         report = mysuper.get_revenue_sold(first_day, last_day)
         myconsole.print(f"Revenue from {first_day.strftime('%b %Y')}: "
             f"{report}", style=stl_reg)
@@ -94,14 +96,12 @@ if args.command == "report" and args.subcommand == "expired":
 if args.command == "report" and args.subcommand == "overview":
     mydate = mydateobj.today
     if args.now:
-        mysuper.print_sold_products(mydate, mydate)
+        pass
     if args.yesterday:
         mydate += timedelta(days=-1)
-        print(mydate)
-        mysuper.print_sold_products(mydate, mydate)
     if args.date:
         mydate = mydateobj.convert_str_to_datetime(args.date)
-        mysuper.print_sold_products(mydate, mydate)
+    mysuper.print_selling_overview(mydate, mydate)
 
 if args.command == "report" and args.subcommand == "profit":
     curr_date = mydateobj.today
