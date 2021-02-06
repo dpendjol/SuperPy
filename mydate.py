@@ -24,7 +24,7 @@ class ShopDate():
         return self.today + timedelta(days=-1)
 
     @property
-    def day_range_month(self):
+    def current_month_range(self):
         '''Get the range of the days of the current month
 
         Returns:
@@ -35,7 +35,29 @@ class ShopDate():
             month = 1
             end = datetime(self.today.year,
                            month, 1) + timedelta(days=-1)
-        return 1, end.day
+        return datetime(self.today.year, self.today.month, 1), end.day
+
+    @staticmethod
+    def get_range_month(input_date):
+        ''' 
+        Not used yet
+        get the range of the dayes of the input month
+
+        Returns:
+        tuple -- first day of current month, last day of month in given day
+        '''
+        try:
+            obj = datetime.strptime(input_date, "%Y-%m")
+        except ValueError:
+            print("Please check the date and format. Format has to be yyyy-mm")
+            exit()
+        month = obj.month + 1
+        month = month if month <= 12 else 1
+
+        start = datetime(obj.year, obj.month, 1)
+        end = datetime(obj.year, month, 1) + timedelta(-1)
+
+        return start, end
 
     @staticmethod
     def convert_str_to_datetime(datestr: str):
@@ -44,16 +66,11 @@ class ShopDate():
         Arguments:
         datestr -- string in format [yyyy-mm] or [yyyy-mm-dd]
         '''
-        if len(datestr) == 7:
-            try:
-                return datetime.strptime(datestr, "%Y-%m")
-            except ValueError as err:
-                print(err)
-        elif len(datestr) == 10:
-            try:
-                return datetime.strptime(datestr, ShopDate.std_format)
-            except ValueError as err:
-                print(err)
+        try:
+            return datetime.strptime(datestr, ShopDate.std_format)
+        except ValueError as err:
+            print(err)
+            exit()
 
     @staticmethod
     def convert_datetime_to_str(datedt: datetime):
@@ -71,7 +88,8 @@ class ShopDate():
 
         Arguments:
         days -- number of days to be shifted
-        save -- does it need to be saved to the file
+        save -- does it need to be saved to the file, or just shift it for 
+                this instance
         Default = True
         '''
         self.today += timedelta(days=days)

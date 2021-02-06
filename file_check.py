@@ -21,19 +21,11 @@ def check_files(cwd, folder, **kwargs):
         makedirs(full_path)
 
     try:
-        date_file = kwargs['data']
         bought_file = kwargs['bought']
         sold_file = kwargs['sold']
     except KeyError as e:
         print(e)
     else:
-        datefile = path.join(full_path, date_file)
-        date_file_exists = path.isfile(datefile)
-        if not date_file_exists:
-            with open(datefile, 'w') as filehandle:
-                today = date.today()
-                today_str = today.isoformat()
-                filehandle.write(today_str)
         boughtfile = path.join(full_path, bought_file)
         bought_file_exists = path.isfile(boughtfile)
         if not bought_file_exists:
