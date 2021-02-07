@@ -223,7 +223,7 @@ class Supermarket:
             table.add_row(self.bought[k]['product_name'],
                           str(v),
                           str(format(product_costs, ".2f")),
-                          self.bought[k]['expiration_date'].isoformat())
+                          self.bought[k]['expiration_date'].strftime("%Y-%m-%d"))
         myconsole = Console()
         myconsole.print(table)
 

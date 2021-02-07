@@ -23,7 +23,6 @@ class ShopDate():
     def yesterday(self):
         return self.today + timedelta(days=-1)
 
-    @property
     def current_month_range(self):
         '''Get the range of the days of the current month
 
@@ -33,9 +32,11 @@ class ShopDate():
         month = self.today.month + 1
         if month > 12:
             month = 1
-            end = datetime(self.today.year,
-                           month, 1) + timedelta(days=-1)
-        return datetime(self.today.year, self.today.month, 1), end.day
+        end = datetime(self.today.year,
+                       month, 1) + timedelta(days=-1)
+        start = datetime(self.today.year, self.today.month, 1)
+        end = datetime(self.today.year, self.today.month, end.day)
+        return start, end
 
     @staticmethod
     def get_range_month(input_date):

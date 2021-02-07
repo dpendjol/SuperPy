@@ -62,6 +62,7 @@ if args.command == "report" and args.subcommand == "inventory":
 
 if args.command == "report" and args.subcommand == "revenue":
     report = 0
+    daystr = ''
     if args.today:
         curr_date = mydateobj.today
         report = mysuper.get_revenue_sold(curr_date, curr_date)
@@ -71,20 +72,32 @@ if args.command == "report" and args.subcommand == "revenue":
         report = mysuper.get_revenue_sold(asked_date, asked_date)
         myconsole.print(f"Yesterday's revenue: {report}", style=stl_reg)
     if args.date:
-        first_day, last_day = mydateobj.get_range_month(args.date)
+        if len(args.date) == 7:
+            first_day, last_day = mydateobj.get_range_month(args.date)
+        elif len(args.date) == 10:
+            first_day = mydateobj.convert_str_to_datetime(args.date)
+            last_day = first_day
+            daystr = str(first_day.day)
+        else:
+            myconsole.print(("Error: please check if the date conforms to "
+                             "yyyy-mm for monthly or yyyy-mm-dd for daily "
+                             "report"), style=stl_error)
+            exit()
+
         report = mysuper.get_revenue_sold(first_day, last_day)
-        myconsole.print(f"Revenue from {first_day.strftime('%b %Y')}: "
+        myconsole.print(f"Revenue from {daystr + ' ' if daystr else ''}"
+                        f"{first_day.strftime('%b %Y')}: "
             f"{report}", style=stl_reg)
 
 if args.command == "report" and args.subcommand == "expired":
     if args.now:
         mydate = mydateobj.today
-        inventory = mysuper.get_inventory(mydate)
+        inventory = mysuper.get_inventory(mydate, mydate)
         expired_items = mysuper.get_expired_items(mydate, inventory,
                                                   to_expire=False)
     if args.nextweek:
-        mydate = mydate + timedelta(days=7)
-        inventory = mysuper.get_inventory(mydate)
+        mydate = mydateobj.today + timedelta(days=7)
+        inventory = mysuper.get_inventory(mydate, mydate)
         expired_items = mysuper.get_expired_items(mydate, inventory,
                                                   to_expire=True)
     try:
@@ -138,9 +151,10 @@ if args.advance_time:
 # Setting the date variables for the transactions reports
 try:
     if args.all:
-        day = date(2021, 1, 1)
+        day = mydateobj.convert_str_to_datetime("2021-01-01")
         last_day = mysuper.current_date + timedelta(days=1)
     if args.current_month:
+        print(mydateobj.current_month_range())
         day, last_day = mydateobj.current_month_range()
     if args.current_year:
         day = date(mysuper.current_date.year, 1, 1)

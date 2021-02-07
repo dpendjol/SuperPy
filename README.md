@@ -197,13 +197,13 @@ The result looks the same, but now we can see which products are going bad in de
 
 If we want to know wat we products we sold at a particular day, then we can use the command:
 
-`usage: super.py report sold [--now | --yesterday | --today | --nextweek | --date DATE]`
+`usage: super.py report overview [--now | --yesterday | --today | --nextweek | --date DATE]`
 
 *sidenote: the `--now` and the `--today` flag give the same results*
 
 So we want to know what we sold on the following date 2021-02-05. We can do that with the command:
 
-`> python super.py report sold --date 2021-02-05`
+`> python super.py report overview --date 2021-02-05`
 
 Below you can see the output of this command
 
