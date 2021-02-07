@@ -1,7 +1,6 @@
 from matplotlib import pyplot as plt
-from rich.console import Console
-from dates import get_dates_month
 from datetime import timedelta, datetime
+
 
 def make_bar_chart(data_x, *data_y, **kwargs):
 
@@ -13,13 +12,15 @@ def make_bar_chart(data_x, *data_y, **kwargs):
 
     Also possible to use arguments used in matplotlib
 
+    Return:
+    None
     '''
     for data in data_y:
         plt.plot(data_x, data)
     number_of_items = len(data_x)
     to_calculate_ticks = round(number_of_items / 25)
     number_of_ticks = to_calculate_ticks if to_calculate_ticks > 0 else 1
-    
+
     i = 0
     labels = []
     ticks = []
@@ -35,8 +36,11 @@ def make_bar_chart(data_x, *data_y, **kwargs):
     plt.title(kwargs['title'])
     plt.show()
 
+    return None
 
-def get_transactions_per_day(asked_date, sold_file):
+
+def get_transactions_per_day(asked_date: str, sold_file):
+    '''Get the transactions per day'''
     output = filter(lambda item: item[1]['selling_date'] ==
                     asked_date, sold_file.items())
     return dict(output)
@@ -50,6 +54,7 @@ def get_number_of_transactions_per_day(asked_date: str):
 
 
 def get_average_transaction_per_day(asked_date):
+    '''Get the average amount spend per transactions per day '''
     output = get_transactions_per_day(asked_date)
     total_revenue = 0
     for item in output.values():
@@ -61,30 +66,16 @@ def get_average_transaction_per_day(asked_date):
     return average
 
 
-def _get_cost_per_day(asked_date):
-    output = filter(lambda item: item[1]['purchase_date'] ==
-                    asked_date)
-    return dict(output)
+# Redundant?
+# def plot_average_transactions(month: str):
+#     day, last_day = get_dates_month(month)
+#     transactions = []
+#     while day < last_day:
+#         transactions.append((day.strftime("%Y-%m-%d"),
+#                             get_average_transaction_per_day(day)))
+#         day += timedelta(days=1)
+#     print(transactions)
 
-def plot_average_transactions(month:str):
-    day, last_day = get_dates_month(month)
-    transactions = []
-    while day < last_day:
-        transactions.append((day.strftime("%Y-%m-%d"), 
-                            get_average_transaction_per_day(day)))
-        day += timedelta(days=1)
-    print(transactions)
 
-myconsole = Console()
-# output = get_number_of_transactions_per_day('2021-01-01')
-# output = get_average_transaction_per_day('2021-01-01')
-# myconsole.print(output, style='')
-
-# bought_items = {k: v for k, v in sorted(self.bought.items(),
-#                key=lambda item: item[1]['expiration_date'])}
-
-#plot_average_transactions("2021-01")
-# mysuper = Supermarket("bought.csv", "sold.csv")
-# data = mysuper.get_monthly_data("2020-01")
-# make_bar_chart(data['days'], data['costs'], data['revenue'], data['profit'],
-#                xlabel="xlabel", ylabel="ylabel", title="title")
+if __name__ == "__main__":
+    pass

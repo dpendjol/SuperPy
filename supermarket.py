@@ -1,7 +1,6 @@
 
 import csv
-from datetime import date, timedelta
-from dates import get_current_date, get_dates_month
+from datetime import datetime, timedelta
 from rich.table import Table
 from rich.console import Console
 from os import path, getcwd
@@ -14,25 +13,18 @@ class Supermarket:
     one for a date file
     '''
 
-    def __init__(self):
+    def __init__(self, data_folder, bought_file, sold_file, current_date):
 
         working_directory = getcwd()
-        data_folder = 'data'
-        bought_file = 'bought.csv'
-        sold_file = 'sold.csv'
-        date_file = 'date.txt'
 
         # Check if the nessesary files exist, if not, then create them
-        check_files(working_directory, data_folder, data=date_file,
+        check_files(working_directory, data_folder,
                     sold=sold_file, bought=bought_file)
 
-        self.current_date = get_current_date(
-            path.join(data_folder, date_file)
-        )
+        self.current_date = current_date
 
         self.bought_file = path.join(data_folder, bought_file)
         self.sold_file = path.join(data_folder, sold_file)
-        self.date_file = path.join(data_folder, date_file)
 
         self.bought = self.read_file(self.bought_file)
         self.sold = self.read_file(self.sold_file)
@@ -57,11 +49,11 @@ class Supermarket:
                         'product_name': line['product_name'],
                         'purchase_count': int(line['purchase_count']),
                         'purchase_price': float(line['purchase_price']),
-                        'expiration_date': date.fromisoformat(
-                                                        line['expiration_date']
-                                                        ),
-                        'purchase_date': date.fromisoformat(
-                            line['purchase_date'])
+                        'expiration_date': datetime.strptime(
+                                                        line['expiration_date'],
+                                                        "%Y-%m-%d"),
+                        'purchase_date': datetime.strptime(
+                            line['purchase_date'], "%Y-%m-%d")
                     }
 
             if file_name == self.sold_file:
@@ -70,19 +62,21 @@ class Supermarket:
                         'product_id': line['product_id'],
                         'selling_count': int(line['selling_count']),
                         'selling_price': float(line['selling_price']),
-                        'selling_date': date.fromisoformat(
-                                            line['selling_date'])
+                        'selling_date': datetime.strptime(
+                                            line['selling_date'], "%Y-%m-%d")
                     }
 
             return output
 
-    def get_inventory(self, first_day=date(1970, 1, 1),
-                      last_day=date(2500, 1, 1)):
+    def get_inventory(self, first_day: datetime,
+                      last_day: datetime):
         '''Get the total inventory
 
         Arguments:
         first_day -- records from and including this date will be found
+                     is a datetime object
         last_day -- record till and including this date will be found
+                    is a datetime object
 
         Returns:
         dict -- dictionary, key = product id, value = amount not sold yet
@@ -111,7 +105,8 @@ class Supermarket:
                 inventory[product_id] = product_specs['purchase_count']
         return inventory
 
-    def print_inventory_table(self, asked_date):
+# Maybe do some work here
+    def print_inventory_table(self, asked_date: datetime):
         '''Display a table which contains every inventory item
 
         Arguments:
@@ -132,7 +127,7 @@ class Supermarket:
         table.add_column('Bought for')
         table.add_column('Expire on')
 
-        inventory = self.get_inventory(last_day=asked_date)
+        inventory = self.get_inventory(datetime(1970,1,1), last_day=asked_date)
 
         for product_id, amount in inventory.items():
             if not amount == 0 and \
@@ -151,7 +146,7 @@ class Supermarket:
                             product['product_name'],
                             str(amount),
                             str(product['purchase_price']),
-                            date.isoformat(product['expiration_date'])
+                            product['expiration_date'].strftime("%Y-%m-%d")
                         )
                 except KeyError:
                     pass
@@ -165,8 +160,8 @@ class Supermarket:
         '''Get the experied items
 
         Arguments:
-        asked_date -- asked day
-        inventory -- inventory list
+        asked_date -- Evertyhing before this date has to be taken into account
+        inventory -- inventory list from self.get_inventory
 
         Returns:
         dict -- {product_id: amount_that_expired}
@@ -175,7 +170,7 @@ class Supermarket:
         if to_expire:
             start_date = self.current_date
         else:
-            start_date = date(1970, 1, 1)
+            start_date = datetime.strptime("1970-01-01", "%Y-%m-%d")
         product_expired = filter(lambda item: start_date
                                  <= item[1]['expiration_date']
                                  <= asked_date, self.bought.items()
@@ -193,6 +188,9 @@ class Supermarket:
 
         Arguments:
         dict_expired_items -- a dictionary of the expired items
+
+        Returns:
+        float -- total costs of the products in the experied items
         '''
         total_costs = 0
         for product_id, amount in dict_expired_items.items():
@@ -204,6 +202,9 @@ class Supermarket:
 
         Arguments:
         dict_expired_items -- return from get_expired_items()
+
+        Returns:
+        None
         '''
         total_costs = self.get_expired_costs(dict_expired_items)
 
@@ -222,12 +223,14 @@ class Supermarket:
             table.add_row(self.bought[k]['product_name'],
                           str(v),
                           str(format(product_costs, ".2f")),
-                          self.bought[k]['expiration_date'].isoformat())
+                          self.bought[k]['expiration_date'].strftime("%Y-%m-%d"))
         myconsole = Console()
         myconsole.print(table)
 
-    def _get_sold_products_by_name(self, first_day=date(1970, 1, 1),
-                                   last_day=date(2500, 1, 1)):
+        return None
+
+    def get_sold_products_by_name(self, first_day,
+                                  last_day):
         '''
         Get the sold product items sold between first_day till and including
         last_day
@@ -241,8 +244,7 @@ class Supermarket:
                     Default is 1st January 2500
 
         Return:
-        float -- total costs of all products that are expired in the given
-                 timeperiod
+        dict -- {productname: {number sold, revenue, costs}}
         '''
         output = {}
         sold = filter(lambda x: first_day <= x[1]['selling_date'] <= last_day,
@@ -267,11 +269,22 @@ class Supermarket:
                                     }
         return output
 
-    def print_sold_products(self, asked_date=date(1970, 1, 1)):
-        sold_items = self._get_sold_products_by_name()
+    def print_selling_overview(self, day: datetime, last_day: datetime):
+        '''Print a overview of the sold product. Tabel contains
+        the cost, revenue and profit per product and totals.
+
+        Arguments:
+        day -- start day of selection period
+        last_day -- end day of the selection
+
+        Returns:
+        None
+
+        '''
+        sold_items = self.get_sold_products_by_name(day, last_day)
         table = Table(show_header=True, header_style="green",
                       show_footer=True, footer_style="bold red on white",
-                      title="Sold products", title_style="bold blue",
+                      title=f"Overview", title_style="bold blue",
                       title_justify="left")
 
         total_revenue = 0
@@ -280,20 +293,30 @@ class Supermarket:
         for item in sold_items.values():
             total_revenue += item['revenue']
             total_costs += item['costs']
+        
+        total_profit = total_revenue - total_costs
 
         table.add_column("Product name")
         table.add_column("Producs sold", justify="right")
-        table.add_column("Revenue", f"{total_revenue}", justify="right")
-        table.add_column("Costs", f"{total_costs}", justify="right")
+        table.add_column("Revenue", f"{format(total_revenue, '.2f')}",
+                         justify="right")
+        table.add_column("Costs", f"{format(total_costs, '.2f')}",
+                         justify="right")
+        table.add_column("Profit", f"{format(total_profit, '.2f')}",
+                         justify="right")
 
         for product_name, product_specs in sold_items.items():
             table.add_row(product_name,
                           str(product_specs['selling_count']),
                           str(format(product_specs['revenue'], ".2f")),
-                          str(format(product_specs['costs'], ".2f"))
+                          str(format(product_specs['costs'], ".2f")),
+                          str(format(product_specs['revenue']
+                                     - product_specs['costs'], ".2f"))
                           )
         console = Console()
         console.print(table)
+        
+        return None
 
     def get_costs_sold(self, start_date, end_date):
         '''Get the sum of the cost of the sold products
@@ -337,7 +360,7 @@ class Supermarket:
         return total_revenue
 
     def buy_product(self, product_name: str, price: float,
-                    amount: int, expiration_date):
+                    amount: int, expiration_date: datetime):
         '''Buy a product
 
         Arguments:
@@ -347,12 +370,12 @@ class Supermarket:
         expiration_date -- string representation of the date yyyy-mm-dd
 
         Returns:
-        boolean
+        tuple -- (boolean, 'OK') on succes
         '''
         # Check if there is a product width the same price and experation date
 
-        expiration_date = date.fromisoformat(expiration_date)
-
+        #expiration_date = datetime.strptime(expiration_date, "%Y-%m-%d")
+        print(type(expiration_date))
         for key, value in self.bought.items():
             if value['product_name'] == product_name and \
                value['purchase_price'] == price and \
@@ -388,7 +411,7 @@ class Supermarket:
             return product_ids
         return -1
 
-    def sell_product(self, product_name, amount, price):
+    def sell_product(self, product_name: str, amount: int, price: float):
         '''Selling products
 
         Arguments:
@@ -403,7 +426,7 @@ class Supermarket:
         '''
 
         product_ids = self.get_product_id(product_name)
-        inventory = self.get_inventory()
+        inventory = self.get_inventory(datetime(1970,1,1), datetime(2200,1,1))
 
         if product_ids == -1:
             raise Exception('Error: Product not in stock')
@@ -451,7 +474,7 @@ class Supermarket:
                     self.sold[str(new_id)] = {
                         'product_id': product_id,
                         'selling_count': amount,
-                        'selling_date': Supermarket.current_date,
+                        'selling_date': self.current_date,
                         'selling_price': price
                         }
                     break
@@ -506,28 +529,35 @@ class Supermarket:
             writer.writeheader()
             if file_name == self.bought_file:
                 for key, value in data.items():
+                    expiration = datetime.strftime(value['expiration_date'],
+                                                   "%Y-%m-%d")
+                    purchase = datetime.strftime(value['purchase_date'],
+                                                 "%Y-%m-%d")
                     output = {
                         headers[0]: key,
                         headers[1]: value['product_name'],
                         headers[2]: value['purchase_count'],
                         headers[3]: value['purchase_price'],
-                        headers[4]: value['expiration_date'],
-                        headers[5]: value['purchase_date']
+                        headers[4]: expiration,
+                        headers[5]: purchase
                         }
                     writer.writerow(output)
             if file_name == self.sold_file:
                 for key, value in data.items():
+                    selling_date = datetime.strftime(value['selling_date'],
+                                                     "%Y-%m-%d")
                     output = {
                         headers[0]: key,
                         headers[1]: value['product_id'],
                         headers[2]: value['selling_count'],
-                        headers[3]: value['selling_date'],
+                        headers[3]: selling_date,
                         headers[4]: value['selling_price']
                         }
                     writer.writerow(output)
-        return
+        return True, 'Ok'
 
-    def get_monthly_data(self, asked_date: str):
+# Redundant ?
+    def get_monthly_data(self, day, last_day):
         '''returns arrays of data for plotting graphs
 
         Arguments:
@@ -536,7 +566,6 @@ class Supermarket:
         Returns:
         dict -- {days, costs, revenue, profit}
         '''
-        day, last_day = get_dates_month(asked_date)
         days = []
         costs = []
         revenues = []
@@ -554,12 +583,6 @@ class Supermarket:
                 'revenue': revenues,
                 'profit': profits
                 }
-
-    def get_sold_items(self):
-        return self.sold
-
-    def get_bought_items(self):
-        return self.bought
 
     def get_transactions_per_day(self, asked_date):
         output = filter(lambda item: item[1]['selling_date'] ==
@@ -584,7 +607,6 @@ class Supermarket:
         return average
 
     def plot_average_transactions(self, day, last_day):
-        print("IMPORTANT", day, last_day)
         dates = []
         average = []
         while day < last_day:
@@ -594,7 +616,6 @@ class Supermarket:
         return dates, average
 
     def plot_number_of_transactions(self, day, last_day):
-        print("IMPORTANT", day, last_day)
         dates = []
         average = []
         while day < last_day:
@@ -602,10 +623,6 @@ class Supermarket:
             average.append(self.get_number_of_transactions_per_day(day))
             day += timedelta(days=1)
         return dates, average
-
-
-
-
 
 
 if __name__ == "__main__":
