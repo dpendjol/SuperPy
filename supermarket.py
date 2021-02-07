@@ -127,7 +127,8 @@ class Supermarket:
         table.add_column('Bought for')
         table.add_column('Expire on')
 
-        inventory = self.get_inventory(datetime(1970,1,1), last_day=asked_date)
+        inventory = self.get_inventory(datetime(1970, 1, 1),
+                                       last_day=asked_date)
 
         for product_id, amount in inventory.items():
             if not amount == 0 and \
@@ -284,7 +285,7 @@ class Supermarket:
         sold_items = self.get_sold_products_by_name(day, last_day)
         table = Table(show_header=True, header_style="green",
                       show_footer=True, footer_style="bold red on white",
-                      title=f"Overview", title_style="bold blue",
+                      title="Overview", title_style="bold blue",
                       title_justify="left")
 
         total_revenue = 0
@@ -293,7 +294,7 @@ class Supermarket:
         for item in sold_items.values():
             total_revenue += item['revenue']
             total_costs += item['costs']
-        
+
         total_profit = total_revenue - total_costs
 
         table.add_column("Product name")
@@ -315,7 +316,7 @@ class Supermarket:
                           )
         console = Console()
         console.print(table)
-        
+
         return None
 
     def get_costs_sold(self, start_date, end_date):
@@ -374,8 +375,6 @@ class Supermarket:
         '''
         # Check if there is a product width the same price and experation date
 
-        #expiration_date = datetime.strptime(expiration_date, "%Y-%m-%d")
-        print(type(expiration_date))
         for key, value in self.bought.items():
             if value['product_name'] == product_name and \
                value['purchase_price'] == price and \
@@ -426,7 +425,8 @@ class Supermarket:
         '''
 
         product_ids = self.get_product_id(product_name)
-        inventory = self.get_inventory(datetime(1970,1,1), datetime(2200,1,1))
+        inventory = self.get_inventory(datetime(1970, 1, 1),
+                                       datetime(2200, 1, 1))
 
         if product_ids == -1:
             raise Exception('Error: Product not in stock')

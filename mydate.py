@@ -28,6 +28,7 @@ class ShopDate():
 
         Returns:
         tuple -- first day of current month, last day of current month
+                 both are datetime objects
         '''
         month = self.today.month + 1
         if month > 12:
@@ -40,9 +41,8 @@ class ShopDate():
 
     @staticmethod
     def get_range_month(input_date):
-        ''' 
-        Not used yet
-        get the range of the dayes of the input month
+        '''
+        get the range of the day's of the input month
 
         Returns:
         tuple -- first day of current month, last day of month in given day
@@ -89,7 +89,7 @@ class ShopDate():
 
         Arguments:
         days -- number of days to be shifted
-        save -- does it need to be saved to the file, or just shift it for 
+        save -- does it need to be saved to the file, or just shift it for
                 this instance
         Default = True
         '''

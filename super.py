@@ -87,7 +87,7 @@ if args.command == "report" and args.subcommand == "revenue":
         report = mysuper.get_revenue_sold(first_day, last_day)
         myconsole.print(f"Revenue from {daystr + ' ' if daystr else ''}"
                         f"{first_day.strftime('%b %Y')}: "
-            f"{report}", style=stl_reg)
+                        f"{report}", style=stl_reg)
 
 if args.command == "report" and args.subcommand == "expired":
     if args.now:
