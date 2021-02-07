@@ -16,12 +16,13 @@ def get_args():
     parser = argparse.ArgumentParser()
     subparser = parser.add_subparsers(dest="command")
 # Everthing that had to do with shifting time
-    parser.add_argument(
-        "--advance-time",
-        type=int,
-        help="specify how many day's you want to shift time, \
-        use the minus sign (-) for days to the past"
-        )
+    parser.add_argument("--advance-time", type=int,
+                        help="specify how many day's you want to shift time, \
+                        use the minus sign (-) for days to the past"
+                        )
+    parser.add_argument("--date-to-sysdate",
+                        action="store_true", help="reset the date to the \
+                        systemdate")
 # Everything that has to do with the report command
     report_parser = subparser.add_parser("report", help="report command")
     report_parser.add_argument("subcommand",

@@ -279,6 +279,15 @@ If we want to reset the date to the system date we can pass any negative value. 
 
 `> python super.py --advance-time -1`
 
+#### **Reset time**
+To set the date to the systemdate quickly we can use the command:
+
+`> usage: super.py [-h] [--date-to-sysdate]`
+
+So if you want to set the date to the system date:
+
+`> python super.py --date-to-sysdate`
+
 ---
 ### Thank you
 ---

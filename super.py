@@ -148,6 +148,9 @@ if args.advance_time:
     if args.advance_time < 0:
         shifted = mydateobj.shift(args.advance_time)
 
+if args.advance_time:
+    mydateobj.reset_date()
+
 # Setting the date variables for the transactions reports
 try:
     if args.all:
