@@ -120,12 +120,12 @@ class Supermarket:
             Needs rich.table and rich.console
         '''
         table = Table(show_header=True, header_style="bold green",
-                      title='Inventory report', title_style="bold blue",
+                      title="Inventory report", title_style="bold blue",
                       title_justify="left")
-        table.add_column('Product Name')
-        table.add_column('Amount')
-        table.add_column('Bought for')
-        table.add_column('Expire on')
+        table.add_column("Product Name")
+        table.add_column("Amount")
+        table.add_column("Bought for")
+        table.add_column("Expire on")
 
         inventory = self.get_inventory(datetime(1970, 1, 1),
                                        last_day=asked_date)
@@ -214,11 +214,11 @@ class Supermarket:
 
         table = Table(show_header=True, header_style="green",
                       show_footer=True, footer_style="bold red on white",
-                      title='Expired report', title_style="frame bold blue",
+                      title="Expired report", title_style="frame bold blue",
                       title_justify="left")
-        table.add_column('Product Name')
-        table.add_column('Number of products', justify="right")
-        table.add_column('Loss in euro', str(format(total_costs, ".2f")),
+        table.add_column("Product Name")
+        table.add_column("Number of products", justify="right")
+        table.add_column("Loss in euro", str(format(total_costs, ".2f")),
                          justify="right")
         table.add_column("Expired on", justify="right")
 
@@ -447,8 +447,8 @@ class Supermarket:
         # that equals the --product-name argument
         if amount is None:
             check = None
-            while not (check == 'n' or check == 'y'):
-                check = input('Do you want to sell all the {}? [y/n] '
+            while not (check == "n" or check == "y"):
+                check = input("Do you want to sell all the {}? [y/n] "
                               .format(self.bought[product_id]['product_name']))
                 if check == 'n':
                     return
@@ -461,7 +461,7 @@ class Supermarket:
                         'selling_date': self.current_date,
                         'selling_price': price
                         }
-            return True, 'OK, product sold out now'
+            return True, "OK, product sold out now"
 
         if total_amount < amount:
             if total_amount == 0:
@@ -492,7 +492,7 @@ class Supermarket:
                         }
                     inventory[product_id] = 0
                     amount -= sell_out_amount
-        return True, 'Ok'
+        return True, "Ok"
 
     def get_latest_id(self, infile='sold'):
         '''Get the latest id
@@ -557,48 +557,45 @@ class Supermarket:
                         headers[4]: value['selling_price']
                         }
                     writer.writerow(output)
-        return True, 'Ok'
-
-# Redundant ?
-    def get_monthly_data(self, day, last_day):
-        '''returns arrays of data for plotting graphs
-
-        Arguments:
-        asked_date -- give a year and a month in the format yyyy-mm
-
-        Returns:
-        dict -- {days, costs, revenue, profit}
-        '''
-        days = []
-        costs = []
-        revenues = []
-        profits = []
-        while not day > last_day:
-            days.append(day.strftime("%Y-%b-%d"))
-            cost = self.get_costs_sold(day, day)
-            revenue = self.get_revenue_sold(day, day)
-            costs.append(cost)
-            revenues.append(revenue)
-            profits.append(revenue - cost)
-            day = day + timedelta(days=1)
-        return {'days': days,
-                'costs': costs,
-                'revenue': revenues,
-                'profit': profits
-                }
+        return True, "Ok"
 
     def get_transactions_per_day(self, asked_date):
+        '''Get the transactions by a date requested in asked_date
+
+        Arguments:
+        asked_date -- the of which the transactions has to be returnt
+        
+        Returns:
+        dict -- {transaction_id: {details of transaction}}
+        '''
+      
         output = filter(lambda item: item[1]['selling_date'] ==
                         asked_date, self.sold.items())
         return dict(output)
 
     def get_number_of_transactions_per_day(self, asked_date: str):
-        '''Gets the number of transactions per day'''
+        '''Gets the number of transactions per day
+        
+        Arguments:
+        asked_date -- the of which the transactions has to be returnt
+        
+        Returns:
+        int -- number of transactions on a asked_date
+        '''
         output = self.get_transactions_per_day(asked_date)
         number_of_transactions = len(list(output))
         return number_of_transactions
 
     def get_average_transaction_per_day(self, asked_date):
+        '''
+        Gets the average amount spend on a transaction per day
+
+        Arguments:
+        asked_day -- day of which the average has to be calculated
+        
+        Returns:
+        float -- average of the transactions for asked_date
+        ''' 
         output = self.get_transactions_per_day(asked_date)
         total_revenue = 0
         for item in output.values():
@@ -610,6 +607,15 @@ class Supermarket:
         return average
 
     def plot_average_transactions(self, day, last_day):
+        '''Gets the date for plotting the averages of the transactions
+        
+        Arguments:
+        day -- first day of requested period
+        last_day -- last day of requested period
+        
+        Returns:
+        tuple -- list of days, list of averages
+        '''
         dates = []
         average = []
         while day < last_day:
@@ -619,6 +625,15 @@ class Supermarket:
         return dates, average
 
     def plot_number_of_transactions(self, day, last_day):
+        '''Gets the date for plotting the averages number of the transactions
+        
+        Arguments:
+        day -- first day of requested period
+        last_day -- last day of requested period
+        
+        Returns:
+        tuple -- list of days, list of averages
+        '''
         dates = []
         average = []
         while day < last_day:
