@@ -66,11 +66,14 @@ def get_args():
                                                     "per day"))
 
     type_group = transaction_parser.add_mutually_exclusive_group(required=True)
-    type_group.add_argument("--average-amount", action="store_true")
-    type_group.add_argument("--number-of-transactions", action="store_true")
+    type_group.add_argument("--average-amount",
+                            action="store_true")
+    type_group.add_argument("--number-of-transactions",
+                            action="store_true")
 
     selection_group = transaction_parser.add_mutually_exclusive_group(required=True)
-    selection_group.add_argument("--all", action="store_true",
+    selection_group.add_argument("--all",
+                                 action="store_true",
                                  help="get all the transactions")
     selection_group.add_argument("--current-month",
                                  action="store_true",
