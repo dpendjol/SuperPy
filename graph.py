@@ -1,5 +1,5 @@
 from matplotlib import pyplot as plt
-from datetime import timedelta, datetime
+from datetime import datetime
 
 
 def make_bar_chart(data_x, *data_y, **kwargs):
@@ -25,6 +25,7 @@ def make_bar_chart(data_x, *data_y, **kwargs):
     labels = []
     ticks = []
     for item in data_x:
+        print(type(item))
         if i % number_of_ticks == 0:
             mydate = datetime.strptime(item, "%Y-%m-%d")
             labels.append(mydate.strftime("%d-%m"))

@@ -13,6 +13,8 @@ class Supermarket:
     one for a date file
     '''
 
+    std_datestrformat = "%Y-%m-%d"
+
     def __init__(self, data_folder, bought_file, sold_file, current_date):
 
         working_directory = getcwd()
@@ -51,9 +53,10 @@ class Supermarket:
                         'purchase_price': float(line['purchase_price']),
                         'expiration_date': datetime.strptime(
                                                         line['expiration_date'],
-                                                        "%Y-%m-%d"),
+                                                        Supermarket.std_datestrformat),
                         'purchase_date': datetime.strptime(
-                            line['purchase_date'], "%Y-%m-%d")
+                            line['purchase_date'],
+                            Supermarket.std_datestrformat)
                     }
 
             if file_name == self.sold_file:
@@ -63,20 +66,17 @@ class Supermarket:
                         'selling_count': int(line['selling_count']),
                         'selling_price': float(line['selling_price']),
                         'selling_date': datetime.strptime(
-                                            line['selling_date'], "%Y-%m-%d")
+                                            line['selling_date'], self.std_datestrformat)
                     }
 
             return output
 
-    def get_inventory(self, first_day: datetime,
-                      last_day: datetime):
+    def get_inventory(self, first_day: datetime, last_day: datetime):
         '''Get the total inventory
 
         Arguments:
         first_day -- records from and including this date will be found
-                     is a datetime object
         last_day -- record till and including this date will be found
-                    is a datetime object
 
         Returns:
         dict -- dictionary, key = product id, value = amount not sold yet
@@ -147,7 +147,7 @@ class Supermarket:
                             product['product_name'],
                             str(amount),
                             str(product['purchase_price']),
-                            product['expiration_date'].strftime("%Y-%m-%d")
+                            product['expiration_date'].strftime(Supermarket.std_datestrformat)
                         )
                 except KeyError:
                     pass
@@ -161,9 +161,11 @@ class Supermarket:
         '''Get the experied items
 
         Arguments:
-        asked_date -- Evertyhing before this date has to be taken into account
+        asked_date -- # TODO
         inventory -- inventory list from self.get_inventory
-
+        to_expire -- boolean, true for future expire, false for listing 
+                     already expired
+        
         Returns:
         dict -- {product_id: amount_that_expired}
 
@@ -171,7 +173,8 @@ class Supermarket:
         if to_expire:
             start_date = self.current_date
         else:
-            start_date = datetime.strptime("1970-01-01", "%Y-%m-%d")
+            start_date = datetime.strptime("1970-01-01",
+                                           Supermarket.std_datestrformat)
         product_expired = filter(lambda item: start_date
                                  <= item[1]['expiration_date']
                                  <= asked_date, self.bought.items()
@@ -224,7 +227,7 @@ class Supermarket:
             table.add_row(self.bought[k]['product_name'],
                           str(v),
                           str(format(product_costs, ".2f")),
-                          self.bought[k]['expiration_date'].strftime("%Y-%m-%d"))
+                          self.bought[k]['expiration_date'].strftime(Supermarket.std_datestrformat))
         myconsole = Console()
         myconsole.print(table)
 
@@ -530,9 +533,9 @@ class Supermarket:
             if file_name == self.bought_file:
                 for key, value in data.items():
                     expiration = datetime.strftime(value['expiration_date'],
-                                                   "%Y-%m-%d")
+                                                   Supermarket.std_datestrformat)
                     purchase = datetime.strftime(value['purchase_date'],
-                                                 "%Y-%m-%d")
+                                                 Supermarket.std_datestrformat)
                     output = {
                         headers[0]: key,
                         headers[1]: value['product_name'],
@@ -545,7 +548,7 @@ class Supermarket:
             if file_name == self.sold_file:
                 for key, value in data.items():
                     selling_date = datetime.strftime(value['selling_date'],
-                                                     "%Y-%m-%d")
+                                                    Supermarket.std_datestrformat)
                     output = {
                         headers[0]: key,
                         headers[1]: value['product_id'],
@@ -610,7 +613,7 @@ class Supermarket:
         dates = []
         average = []
         while day < last_day:
-            dates.append(day.strftime("%Y-%m-%d"))
+            dates.append(day.strftime(Supermarket.std_datestrformat))
             average.append(self.get_average_transaction_per_day(day))
             day += timedelta(days=1)
         return dates, average
@@ -619,7 +622,7 @@ class Supermarket:
         dates = []
         average = []
         while day < last_day:
-            dates.append(day.strftime("%Y-%m-%d"))
+            dates.append(day.strftime(Supermarket.std_datestrformat))
             average.append(self.get_number_of_transactions_per_day(day))
             day += timedelta(days=1)
         return dates, average

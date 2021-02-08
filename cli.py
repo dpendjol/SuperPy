@@ -16,12 +16,16 @@ def get_args():
     parser = argparse.ArgumentParser()
     subparser = parser.add_subparsers(dest="command")
 # Everthing that had to do with shifting time
-    parser.add_argument(
-        "--advance-time",
-        type=int,
-        help="specify how many day's you want to shift time, \
-        use the minus sign (-) for days to the past"
-        )
+    parser.add_argument("--advance-time", type=int,
+                        help="specify how many day's you want to shift time, \
+                        use the minus sign (-) for days to the past"
+                        )
+    parser.add_argument("--date-to-sysdate",
+                        action="store_true", help="reset the date to the \
+                        systemdate")
+    parser.add_argument("--tell-current-date",
+                        action="store_true", help="print the date the \
+                        the supermarket sees as today")
 # Everything that has to do with the report command
     report_parser = subparser.add_parser("report", help="report command")
     report_parser.add_argument("subcommand",
@@ -29,7 +33,7 @@ def get_args():
                                         "expired", "overview"],
                                help="Choose which report you want to see")
 # Choose to create a group, only one of the arguments can be used at one time
-    time_group = report_parser.add_mutually_exclusive_group()
+    time_group = report_parser.add_mutually_exclusive_group(required=True)
     time_group.add_argument("--now", action="store_true",
                             help="get current inventory")
     time_group.add_argument("--yesterday", action="store_true",
@@ -65,11 +69,14 @@ def get_args():
                                                     "per day"))
 
     type_group = transaction_parser.add_mutually_exclusive_group(required=True)
-    type_group.add_argument("--average-amount", action="store_true")
-    type_group.add_argument("--number-of-transactions", action="store_true")
+    type_group.add_argument("--average-amount",
+                            action="store_true")
+    type_group.add_argument("--number-of-transactions",
+                            action="store_true")
 
     selection_group = transaction_parser.add_mutually_exclusive_group(required=True)
-    selection_group.add_argument("--all", action="store_true",
+    selection_group.add_argument("--all",
+                                 action="store_true",
                                  help="get all the transactions")
     selection_group.add_argument("--current-month",
                                  action="store_true",

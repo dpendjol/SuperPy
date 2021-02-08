@@ -35,7 +35,6 @@ if args.command == "buy":
     else:
         amount = args.amount if args.amount else 1
         expiriation_date = mydateobj.convert_str_to_datetime(args.expiration_date)
-        print(expiriation_date)
         mysuper.buy_product(args.product_name, args.price, amount,
                             expiriation_date)
         mysuper.write_file(mysuper.bought_file, mysuper.bought)
@@ -113,7 +112,12 @@ if args.command == "report" and args.subcommand == "overview":
     if args.yesterday:
         mydate += timedelta(days=-1)
     if args.date:
-        mydate = mydateobj.convert_str_to_datetime(args.date)
+        if len(args.date) == 10:
+            mydate = mydateobj.convert_str_to_datetime(args.date)
+        if len(args.date) == 7:
+            first_day, last_day = mydateobj.get_range_month(args.date)
+            mysuper.print_selling_overview(first_day, last_day)
+            exit()
     mysuper.print_selling_overview(mydate, mydate)
 
 if args.command == "report" and args.subcommand == "profit":
@@ -121,6 +125,9 @@ if args.command == "report" and args.subcommand == "profit":
     first_day = None
     last_day = None
     try:
+        if (args.now or args.nextweek):
+            myconsole.print("Can not use --now or --nextweek with report profit", style=stl_error)
+            exit()
         if args.today:
             first_day = curr_date
         if args.yesterday:
@@ -137,9 +144,11 @@ if args.command == "report" and args.subcommand == "profit":
         myconsole.print(("Please use the --yesterday/--yesterday/--date "
                         "[yyyy-mm-dd] arguments"), style=stl_error)
     else:
-        cost_expired = 0
+        inventory = mysuper.get_inventory(first_day, last_day)
+        expired_items = mysuper.get_expired_items(last_day, inventory, to_expire=False)
+        cost_expired = mysuper.get_expired_costs(expired_items)
         revenue = mysuper.get_revenue_sold(first_day, last_day)
-        myconsole.print(revenue - cost_expired - cost_sold, style=stl_reg)
+        myconsole.print("Profit:", format(revenue - cost_expired - cost_sold, ".2f"), style=stl_reg)
 
 if args.advance_time:
     if args.advance_time >= 0:
@@ -147,6 +156,12 @@ if args.advance_time:
 
     if args.advance_time < 0:
         shifted = mydateobj.shift(args.advance_time)
+
+if args.date_to_sysdate:
+    mydateobj.reset_date()
+
+if args.tell_current_date:
+    myconsole.print(mydateobj.today.strftime("%Y-%m-%d"), style=stl_reg)
 
 # Setting the date variables for the transactions reports
 try:
