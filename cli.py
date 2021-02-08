@@ -23,6 +23,9 @@ def get_args():
     parser.add_argument("--date-to-sysdate",
                         action="store_true", help="reset the date to the \
                         systemdate")
+    parser.add_argument("--tell-current-date",
+                        action="store_true", help="print the date the \
+                        the supermarket sees as today")
 # Everything that has to do with the report command
     report_parser = subparser.add_parser("report", help="report command")
     report_parser.add_argument("subcommand",
@@ -30,7 +33,7 @@ def get_args():
                                         "expired", "overview"],
                                help="Choose which report you want to see")
 # Choose to create a group, only one of the arguments can be used at one time
-    time_group = report_parser.add_mutually_exclusive_group()
+    time_group = report_parser.add_mutually_exclusive_group(required=True)
     time_group.add_argument("--now", action="store_true",
                             help="get current inventory")
     time_group.add_argument("--yesterday", action="store_true",

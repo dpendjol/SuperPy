@@ -12,7 +12,7 @@ class Supermarket:
     Provide 3 files, one for bought products, one for sold products,
     one for a date file
     '''
-    
+
     std_datestrformat = "%Y-%m-%d"
 
     def __init__(self, data_folder, bought_file, sold_file, current_date):
@@ -66,7 +66,7 @@ class Supermarket:
                         'selling_count': int(line['selling_count']),
                         'selling_price': float(line['selling_price']),
                         'selling_date': datetime.strptime(
-                                            line['selling_date'], self.std_dateformat)
+                                            line['selling_date'], self.std_datestrformat)
                     }
 
             return output
@@ -535,7 +535,7 @@ class Supermarket:
                     expiration = datetime.strftime(value['expiration_date'],
                                                    Supermarket.std_datestrformat)
                     purchase = datetime.strftime(value['purchase_date'],
-                                                 Supermarket.std_datestrformat
+                                                 Supermarket.std_datestrformat)
                     output = {
                         headers[0]: key,
                         headers[1]: value['product_name'],
