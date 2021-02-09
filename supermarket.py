@@ -487,7 +487,7 @@ class Supermarket:
                     self.sold[str(new_id)] = {
                         'product_id': product_id,
                         'selling_count': sell_out_amount,
-                        'selling_date': Supermarket.current_date,
+                        'selling_date': self.current_date,
                         'selling_price': price
                         }
                     inventory[product_id] = 0
