@@ -67,7 +67,8 @@ def get_args():
     transaction_parser = subparser.add_parser("transaction",
                                               help=("Plot transaction data "
                                                     "per day"))
-
+    transaction_parser.add_argument("--save", action="store_true",
+                                    help="saving plot in directory 'plots'")
     type_group = transaction_parser.add_mutually_exclusive_group(required=True)
     type_group.add_argument("--average-amount",
                             action="store_true")

@@ -3,7 +3,7 @@ from csv import DictWriter
 
 
 def check_files(cwd, folder, **kwargs):
-    '''Check is the nesseary files are there where they are supposed to be,
+    '''Check if the nesseary files are there where they are supposed to be,
     if not, then create them
 
     Arguments:
