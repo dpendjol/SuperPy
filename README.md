@@ -327,10 +327,13 @@ Overview
 We can also evaluate the transaction. As supermarkt manager you can plot data concerning the average-amount spend bij customers per day per transactions. And we can also plot the number of transactions per day given a certain period. Both will be explaind below
 
 ```
-usage: super.py transaction [-h] (--average-amount | --number-of-transactions) (--all | --current-month | --current-year | --previous-month | --previous-year)
+usage: super.py transaction [-h] [--save]
+                            (--average-amount | --number-of-transactions)      
+                            (--all | --current-month | --current-year | --previous-month | --previous-year)
 
 optional arguments:
   -h, --help            show this help message and exit
+  --save                saving plot in directory 'plots'
   --average-amount
   --number-of-transactions
   --all                 get all the transactions
@@ -362,6 +365,9 @@ That wil result in the following plot.
 ![Number of transactions](readme_img/number_of_transactions.png)
 
 The periods over which this command can display the data are the same as with the `--average-amount` flag.
+
+#### **Saving plots**
+You can save the plot by adding the `--save` flag to the command. There will be a filename generated based on the system time. The file will be saved in a folder called `plots`
 
 ---
 ### Modifying date
