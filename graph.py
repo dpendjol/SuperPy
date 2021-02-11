@@ -1,5 +1,6 @@
 from matplotlib import pyplot as plt
 from datetime import datetime
+from os import path as ospath, getcwd, makedirs
 
 
 def make_bar_chart(data_x, *data_y, **kwargs):
@@ -15,6 +16,14 @@ def make_bar_chart(data_x, *data_y, **kwargs):
     Return:
     None
     '''
+
+    save = kwargs['save']
+    
+    full_path = ospath.join(getcwd(), 'plots')
+    dir_exists = ospath.isdir(full_path)
+    if not dir_exists:
+        makedirs(full_path)
+        
     for data in data_y:
         plt.plot(data_x, data)
     number_of_items = len(data_x)
@@ -25,7 +34,6 @@ def make_bar_chart(data_x, *data_y, **kwargs):
     labels = []
     ticks = []
     for item in data_x:
-        print(type(item))
         if i % number_of_ticks == 0:
             mydate = datetime.strptime(item, "%Y-%m-%d")
             labels.append(mydate.strftime("%d-%m"))
@@ -35,6 +43,11 @@ def make_bar_chart(data_x, *data_y, **kwargs):
     plt.xlabel(kwargs['xlabel'])
     plt.ylabel(kwargs['ylabel'])
     plt.title(kwargs['title'])
+    if save:
+        fname = datetime.now().strftime("%Y%m%d%H%M%S%f.png")
+        relpath = ospath.join(getcwd(), "plots", fname)
+        plt.savefig(relpath)
+        print(f"file saved to {relpath}")
     plt.show()
 
     return None

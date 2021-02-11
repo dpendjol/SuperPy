@@ -201,7 +201,7 @@ if args.command == "transaction" and args.average_amount:
         sys.exit()
     make_bar_chart(dates, average, xlabel="Date", ylabel="Average (EUR)",
                    title=("Average amount spend per transaction per day \n"
-                          "{} - {}").format(daystr, last_daystr))
+                          "{} - {}").format(daystr, last_daystr), save=args.save)
 
 if args.command == "transaction" and args.number_of_transactions:
     dates, average = mysuper.plot_number_of_transactions(day, last_day)
@@ -213,4 +213,4 @@ if args.command == "transaction" and args.number_of_transactions:
         sys.exit()
     make_bar_chart(dates, average, xlabel="date", ylabel="Transactions",
                    title=("Average number of transactions per day \n"
-                          "{} - {}").format(daystr, last_daystr))
+                          "{} - {}").format(daystr, last_daystr), save=args.save)
