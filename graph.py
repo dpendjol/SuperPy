@@ -80,16 +80,5 @@ def get_average_transaction_per_day(asked_date):
     return average
 
 
-# Redundant?
-# def plot_average_transactions(month: str):
-#     day, last_day = get_dates_month(month)
-#     transactions = []
-#     while day < last_day:
-#         transactions.append((day.strftime("%Y-%m-%d"),
-#                             get_average_transaction_per_day(day)))
-#         day += timedelta(days=1)
-#     print(transactions)
-
-
 if __name__ == "__main__":
     pass
