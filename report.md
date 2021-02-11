@@ -56,6 +56,6 @@ time_group.add_argument("--date", type=str,
 So now you can use one one of the arguments in this group. When you specify more, the program reminds you how it was supposed to be used. Furthermore, there is no need for long `if... and... elif ... and ...` statements.
 
 ### Finally
-
+---
 The report has a little bit more then 300 words (not including the code snippets). Hope that’s ok.
 
