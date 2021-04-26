@@ -58,7 +58,7 @@ Lets buy lemons for 25 cents a piece. The apples expiration dates is 3rd of Juni
 
 If you **do not pass** a `--amount [AMOUNT]` the system wil **buy** only **one** item. If you want to buy more, just pass in the argument like so:
 
-`> python super.py buy --product-name lemons --price 0.0.25 --expiration-date 2021-06-03 --amount 19`
+`> python super.py buy --product-name lemons --price 0.25 --expiration-date 2021-06-03 --amount 19`
 
 In the above example we have added 19 lemons to the system.
 
